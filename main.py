@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 __author__ = 'F. Cagnin and A. Torcinovich'
 
 import mnist_loader
