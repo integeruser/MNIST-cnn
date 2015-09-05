@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
 __author__ = "F. Cagnin and A. Torcinovich"
 
+import argparse
+
 import NeuralNetwork
 
 import numpy as np
 
 
-def load_mnist_dataset():
+def load_mnist_dataset(dataset_path):
     # temporary function used to load the mnist data set
     import gzip
     import pickle
 
-    with gzip.open("./data/mnist.pkl.gz", "rb") as f:
+    with gzip.open(dataset_path, "rb") as f:
         tr_d, va_d, te_d = pickle.load(f, encoding="latin1")
         training_inputs = [np.reshape(x, (28, 28)) for x in tr_d[0]]
         training_data = zip(training_inputs, [y for y in tr_d[1]])
@@ -22,10 +24,14 @@ def load_mnist_dataset():
         return training_data, validation_data, test_data
 
 
+parser = argparse.ArgumentParser()
+parser.add_argument("dataset_path")
+args = parser.parse_args()
+
 np.random.seed(314)
 
 print("Loading data")
-training_data, validation_data, test_data = load_mnist_dataset()
+training_data, validation_data, test_data = load_mnist_dataset(args.dataset_path)
 
 print("Generating desired CNN")
 # vec = [784, ("cl", 5, 1, "sigmoid"), ("pl", 2, "mean"), ("fcl", 100, "sigmoid"), ("fcl", 10, "sigmoid")]
