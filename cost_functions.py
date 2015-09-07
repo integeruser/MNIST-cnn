@@ -1,6 +1,5 @@
 __author__ = 'F. Cagnin and A. Torcinovich'
 
-# all these functions work with numpy arrays
 import numpy as np
 
 
