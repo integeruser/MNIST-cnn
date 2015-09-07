@@ -33,4 +33,4 @@ def log_likelihood(a, y):
 
 def der_log_likelihood(a, y):
     """Return the derivative of the log likelihood cost function"""
-    pass
+    raise NotImplementedError()
