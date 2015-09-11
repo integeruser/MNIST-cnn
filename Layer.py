@@ -1,9 +1,11 @@
 __author__ = 'F. Cagnin and A. Torcinovich'
 
 import abc
+
+import numpy as np
+
 import polling_functions
 import act_functions
-import numpy as np
 
 
 class Layer(object):
@@ -41,6 +43,18 @@ class Layer(object):
     @abc.abstractmethod
     def backpropagate(self, z, a, w, delta_zlp):
         """backpropagate the error in the current layer"""
+        raise NotImplementedError
+
+
+class InputLayer(Layer):
+    def __init__(self, size):
+        self.size = size
+        self.num_neurons = size ** 2
+
+    def feedforward(self, a, w, b):
+        raise NotImplementedError
+
+    def backpropagate(self, z, a, w, delta_zlp):
         raise NotImplementedError
 
 
