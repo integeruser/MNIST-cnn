@@ -77,22 +77,8 @@ class NeuralNetwork():
                 kernel_size, stride_length, act_func_str = layer_info[1], layer_info[2], layer_info[3]
                 layer_size = (layer_size - kernel_size) // stride_length + 1
                 layer_n_el = layer_size ** 2
-                # check if a block of layers is specified
-                if 'block' in layer_info:
-                    # store the number of layers in the block and initialize the other structures
-                    n_layers = layer_info[-1]
-                    c_layers = []
-                    cl_weights = []
-                    for i in range(0, n_layers):
-                        c_layers.append(Layer.ConvolutionalLayer(layer_size, kernel_size, stride_length, act_func_str))
-                        cl_weights.append(np.reshape(np.random.normal(0, 1 / kernel_size, (kernel_size, kernel_size)),
-                                                     (kernel_size, kernel_size)))
-                    self.layers.append(c_layers)
-                    self.weights.append(cl_weights)
-                else:
-                    # there is only one layer
-                    self.layers.append(Layer.ConvolutionalLayer(layer_size, kernel_size, stride_length, act_func_str))
-                    self.weights.append(np.reshape(np.random.normal(0, 1 / kernel_size, (kernel_size, kernel_size)),
+                self.layers.append(Layer.ConvolutionalLayer(layer_size, kernel_size, stride_length, act_func_str))
+                self.weights.append(np.reshape(np.random.normal(0, 1 / kernel_size, (kernel_size, kernel_size)),
                                                    (kernel_size, kernel_size)))
                 # in any case there is one shared bias, no matter how many layers are in the block
                 self.biases.append(np.random.normal(0, 1 / kernel_size, 1))
@@ -101,18 +87,7 @@ class NeuralNetwork():
                 kernel_size, poll_func_str, add_params = layer_info[1], layer_info[2], layer_info[3]
                 layer_size = layer_size // kernel_size
                 layer_n_el = layer_size ** 2
-                if 'block' in layer_info:
-                    # store the number of layers in the block and initialize the other structures
-                    n_layers = layer_info[-1]
-                    c_layers = []
-                    for i in range(0, n_layers):
-                        c_layers.append(Layer.PollingLayer(layer_size, kernel_size, poll_func_str, add_params))
-                    # TODO: not very beautiful way to handle this problem
-                    self.weights.append([np.NaN] * n_layers)
-                    self.layers.append(c_layers)
-                else:
-                    # there is only one layer
-                    self.layers.append(Layer.PollingLayer(layer_size, kernel_size, poll_func_str, add_params))
+                self.layers.append(Layer.PollingLayer(layer_size, kernel_size, poll_func_str, add_params))
                 # polling layers haven't associated weights and biases. NaN is stored instead
                 self.weights.append(np.NaN)
                 self.biases.append(np.NaN)
