@@ -4,8 +4,7 @@ import abc
 
 import numpy as np
 
-import polling_functions
-import act_functions
+import functions
 
 
 class Layer(object):
@@ -80,8 +79,8 @@ class FullyConnectedLayer(Layer):
         """
         self.size = size
         self.num_neurons = size
-        self.act_func = getattr(act_functions, act_func_str)
-        self.der_act_func = getattr(act_functions, 'der_' + act_func_str)
+        self.act_func = getattr(functions, act_func_str)
+        self.der_act_func = getattr(functions, 'der_' + act_func_str)
 
     def feedforward(self, a, w, b):
         """ feedforward the observation through the layer
@@ -144,8 +143,8 @@ class ConvolutionalLayer(Layer):
         self.num_neurons = size ** 2
         self.kernel_size = kernel_size
         self.stride_length = stride_length
-        self.act_func = getattr(act_functions, act_func_str)
-        self.der_act_func = getattr(act_functions, 'der_' + act_func_str)
+        self.act_func = getattr(functions, act_func_str)
+        self.der_act_func = getattr(functions, 'der_' + act_func_str)
 
     def feedforward(self, a, w, b):
         """ feedforward the observation through the layer
@@ -208,8 +207,8 @@ class PollingLayer(Layer):
         self.size = size
         self.num_neurons = size ** 2
         self.kernel_size = kernel_size
-        self.poll_func = getattr(polling_functions, poll_func_str)
-        self.der_poll_func = getattr(polling_functions, 'der_' + poll_func_str)
+        self.poll_func = getattr(functions, poll_func_str)
+        self.der_poll_func = getattr(functions, 'der_' + poll_func_str)
         self.add_params = add_params
 
     def feedforward(self, a, w, b):

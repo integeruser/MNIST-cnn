@@ -3,7 +3,7 @@ __author__ = 'F. Cagnin and A. Torcinovich'
 import numpy as np
 
 import layers
-import cost_functions
+import functions
 
 
 class NeuralNetwork():
@@ -65,7 +65,7 @@ class NeuralNetwork():
         self.layers = []
         self.weights = []
         self.biases = []
-        self.der_cost_func = getattr(cost_functions, 'der_' + cost_func_str)
+        self.der_cost_func = getattr(functions, 'der_' + cost_func_str)
         # layer_n_el stores the number of neurons of the previous layer, layer_size stores the side dimension of the
         # previous layer (meaningful for CLs and PLs)
         layer_n_el = layers_info[0]
