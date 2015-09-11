@@ -3,9 +3,9 @@ __author__ = "F. Cagnin and A. Torcinovich"
 
 import argparse
 
-import NeuralNetwork
-
 import numpy as np
+
+import NeuralNetwork
 
 
 def load_mnist_dataset(dataset_path):
@@ -39,7 +39,7 @@ vec = [784, ("fcl", 100, "sigmoid"), ("fcl", 10, "sigmoid")]
 net = NeuralNetwork.NeuralNetwork(vec, "quadratic")
 
 print("Training CNN")
-net.training(list(training_data), 30, 10, 3.0)
+NeuralNetwork.training(net, list(training_data), 30, 10, 3.0)
 
 print("Testing CNN performances")
-net.testing(list(test_data))
+NeuralNetwork.testing(net, list(test_data))

@@ -1,7 +1,8 @@
 __author__ = 'F. Cagnin and A. Torcinovich'
 
-import Layer
 import numpy as np
+
+import Layer
 import cost_functions
 
 
@@ -143,64 +144,66 @@ class NeuralNetwork():
             d_der_bs.insert(0, d_der_b)
         return d_der_ws, d_der_bs
 
-    def training(self, inputs, epochs, batch_size, eta):
-        """Train the network according to the Stochastic Gradient Descent (SGD)
-         algorithm
-        :param inputs:     the observations that are going to be used to train the network
-        :param epochs:     the number of epochs
-        :param batch_size: the size of the batch used in single cycle of the SGD
-        :param eta:        the learning rate
-        """
 
-        # check the correctness of the input
-        if eta <= 0:
-            raise ValueError("eta is not positive")
+def training(net, inputs, epochs, batch_size, eta):
+    """Train the network according to the Stochastic Gradient Descent (SGD)
+     algorithm
+    :param inputs:     the observations that are going to be used to train the network
+    :param epochs:     the number of epochs
+    :param batch_size: the size of the batch used in single cycle of the SGD
+    :param eta:        the learning rate
+    """
 
-        n_obs = len(inputs)
-        if n_obs % batch_size:
-            raise ValueError("the number of observations is not a multiple of 'batch_size'")
+    # check the correctness of the input
+    if eta <= 0:
+        raise ValueError("eta is not positive")
 
-        # initialize y
-        y = np.zeros((self.layers[-1].size, 1))
-        # for each epoch...
-        for i in range(0, epochs):
-            print("Epoch ", i + 1)
-            # shuffle the observations
-            np.random.shuffle(inputs)
-            # for each batch...
-            for j in range(0, n_obs, batch_size):
-                # initialize the structures
-                der_weights = [np.zeros(w.shape) if not isinstance(w, float) else np.NaN for w in self.weights]
-                der_biases = [np.zeros(b.shape) if not isinstance(b, float) else np.NaN for b in self.biases]
-                # for each observation in the current batch...
-                for x, lab in inputs[j:j + batch_size]:
-                    # generate the 1-of-k coding of the current observation class
-                    y[lab] = 1
-                    # feedforward the observation
-                    self.feedforward(x)
-                    # backpropagate the error
-                    (d_der_ws, d_der_bs) = self.backpropagate(y)
-                    # sum the derivatives of the weights and biases of the current observation to the previous ones
-                    der_weights = [dw + ddw for dw, ddw in zip(der_weights, d_der_ws)]
-                    der_biases = [db + ddb for db, ddb in zip(der_biases, d_der_bs)]
-                    # reset y
-                    y[lab] = 0
-                # update weights and biases with the results of the current batch
-                self.weights = [w - eta / batch_size * dw for w, dw in zip(self.weights, der_weights)]
-                self.biases = [b - eta / batch_size * db for b, db in zip(self.biases, der_biases)]
+    n_obs = len(inputs)
+    if n_obs % batch_size:
+        raise ValueError("the number of observations is not a multiple of 'batch_size'")
 
-    def testing(self, tests):
-        """Test the network and return some performances index. Note that the classes must start from 0.
-        :param tests:  the observations that are going to be used to test the performances of the network
-        """
+    # initialize y
+    y = np.zeros((net.layers[-1].size, 1))
+    # for each epoch...
+    for i in range(0, epochs):
+        print("Epoch ", i + 1)
+        # shuffle the observations
+        np.random.shuffle(inputs)
+        # for each batch...
+        for j in range(0, n_obs, batch_size):
+            # initialize the structures
+            der_weights = [np.zeros(w.shape) if not isinstance(w, float) else np.NaN for w in net.weights]
+            der_biases = [np.zeros(b.shape) if not isinstance(b, float) else np.NaN for b in net.biases]
+            # for each observation in the current batch...
+            for x, lab in inputs[j:j + batch_size]:
+                # generate the 1-of-k coding of the current observation class
+                y[lab] = 1
+                # feedforward the observation
+                net.feedforward(x)
+                # backpropagate the error
+                (d_der_ws, d_der_bs) = net.backpropagate(y)
+                # sum the derivatives of the weights and biases of the current observation to the previous ones
+                der_weights = [dw + ddw for dw, ddw in zip(der_weights, d_der_ws)]
+                der_biases = [db + ddb for db, ddb in zip(der_biases, d_der_bs)]
+                # reset y
+                y[lab] = 0
+            # update weights and biases with the results of the current batch
+            net.weights = [w - eta / batch_size * dw for w, dw in zip(net.weights, der_weights)]
+            net.biases = [b - eta / batch_size * db for b, db in zip(net.biases, der_biases)]
 
-        perf = 0
-        # for each observation...
-        for x, lab in tests:
-            # retrieve the index of the output neuron with the maximum activation
-            res = np.argmax(self.feedforward(x)[1][-1])
-            # if it's equal to the label increment perf
-            if lab == res:
-                perf += 1
-        # display the number of correct observations along with its percentage
-        print(perf, " correctly classified observations (", 100 * perf / len(tests), "%)")
+
+def testing(net, tests):
+    """Test the network and return some performances index. Note that the classes must start from 0.
+    :param tests:  the observations that are going to be used to test the performances of the network
+    """
+
+    perf = 0
+    # for each observation...
+    for x, lab in tests:
+        # retrieve the index of the output neuron with the maximum activation
+        res = np.argmax(net.feedforward(x)[1][-1])
+        # if it's equal to the label increment perf
+        if lab == res:
+            perf += 1
+    # display the number of correct observations along with its percentage
+    print(perf, " correctly classified observations (", 100 * perf / len(tests), "%)")
