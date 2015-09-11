@@ -2,7 +2,7 @@ __author__ = 'F. Cagnin and A. Torcinovich'
 
 import numpy as np
 
-import Layer
+import layers
 import cost_functions
 
 
@@ -17,7 +17,7 @@ class NeuralNetwork():
 
     ATTRIBUTES
         self.layers:        list containing the layers forming the NN. Each element is a Layer descendants instance (see
-                            Layer.py).
+                            layers.py).
         self.weights:       list containing the weights of each layer, according to their nature (for polling layers NaN
                             is stored instead).
         self.biases:        list containing the biases of each layer, according to their nature (for polling layers NaN
@@ -77,7 +77,7 @@ class NeuralNetwork():
                 # it's a convolutional layer
                 kernel_size, stride_length, act_func_str = layer_info[1], layer_info[2], layer_info[3]
                 layer_size = (layer_size - kernel_size) // stride_length + 1
-                layer = Layer.ConvolutionalLayer(layer_size, kernel_size, stride_length, act_func_str)
+                layer = layers.ConvolutionalLayer(layer_size, kernel_size, stride_length, act_func_str)
                 self.layers.append(layer)
                 self.weights.append(np.reshape(np.random.normal(0, 1 / kernel_size, (kernel_size, kernel_size)),
                                                    (kernel_size, kernel_size)))
@@ -87,7 +87,7 @@ class NeuralNetwork():
                 # it's a polling layer
                 kernel_size, poll_func_str, add_params = layer_info[1], layer_info[2], layer_info[3]
                 layer_size = layer_size // kernel_size
-                layer = Layer.PollingLayer(layer_size, kernel_size, poll_func_str, add_params)
+                layer = layers.PollingLayer(layer_size, kernel_size, poll_func_str, add_params)
                 self.layers.append(layer)
                 # polling layers haven't associated weights and biases. NaN is stored instead
                 self.weights.append(np.NaN)
@@ -95,7 +95,7 @@ class NeuralNetwork():
             elif layer_info[0] == 'fcl':
                 # it's a fully connected layer
                 layer_size, act_func_str = layer_info[1], layer_info[2]
-                layer = Layer.FullyConnectedLayer(layer_size, act_func_str)
+                layer = layers.FullyConnectedLayer(layer_size, act_func_str)
                 self.layers.append(layer)
                 self.weights.append(np.reshape(np.random.normal(0, 1 / layer_n_el ** 0.5, (layer_size, layer_n_el)),
                                                (layer_size, layer_n_el)))
@@ -145,7 +145,7 @@ class NeuralNetwork():
         return d_der_ws, d_der_bs
 
 
-def training(net, inputs, epochs, batch_size, eta):
+def train(net, inputs, epochs, batch_size, eta):
     """Train the network according to the Stochastic Gradient Descent (SGD)
      algorithm
     :param inputs:     the observations that are going to be used to train the network
@@ -192,7 +192,7 @@ def training(net, inputs, epochs, batch_size, eta):
             net.biases = [b - eta / batch_size * db for b, db in zip(net.biases, der_biases)]
 
 
-def testing(net, tests):
+def test(net, tests):
     """Test the network and return some performances index. Note that the classes must start from 0.
     :param tests:  the observations that are going to be used to test the performances of the network
     """

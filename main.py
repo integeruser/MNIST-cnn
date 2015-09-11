@@ -5,7 +5,7 @@ import argparse
 
 import numpy as np
 
-import NeuralNetwork
+import nn
 
 
 def load_mnist_dataset(dataset_path):
@@ -36,10 +36,10 @@ training_data, validation_data, test_data = load_mnist_dataset(args.dataset_path
 print("Generating desired CNN")
 # vec = [784, ("cl", 5, 1, "sigmoid"), ("pl", 2, "mean"), ("fcl", 100, "sigmoid"), ("fcl", 10, "sigmoid")]
 vec = [784, ("fcl", 100, "sigmoid"), ("fcl", 10, "sigmoid")]
-net = NeuralNetwork.NeuralNetwork(vec, "quadratic")
+net = nn.NeuralNetwork(vec, "quadratic")
 
 print("Training CNN")
-NeuralNetwork.training(net, list(training_data), 30, 10, 3.0)
+nn.train(net, list(training_data), 30, 10, 3.0)
 
 print("Testing CNN performances")
-NeuralNetwork.testing(net, list(test_data))
+nn.test(net, list(test_data))
