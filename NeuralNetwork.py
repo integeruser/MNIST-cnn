@@ -76,8 +76,8 @@ class NeuralNetwork():
                 # it's a convolutional layer
                 kernel_size, stride_length, act_func_str = layer_info[1], layer_info[2], layer_info[3]
                 layer_size = (layer_size - kernel_size) // stride_length + 1
-                layer_n_el = layer_size ** 2
-                self.layers.append(Layer.ConvolutionalLayer(layer_size, kernel_size, stride_length, act_func_str))
+                layer = Layer.ConvolutionalLayer(layer_size, kernel_size, stride_length, act_func_str)
+                self.layers.append(layer)
                 self.weights.append(np.reshape(np.random.normal(0, 1 / kernel_size, (kernel_size, kernel_size)),
                                                    (kernel_size, kernel_size)))
                 # in any case there is one shared bias, no matter how many layers are in the block
@@ -86,20 +86,22 @@ class NeuralNetwork():
                 # it's a polling layer
                 kernel_size, poll_func_str, add_params = layer_info[1], layer_info[2], layer_info[3]
                 layer_size = layer_size // kernel_size
-                layer_n_el = layer_size ** 2
-                self.layers.append(Layer.PollingLayer(layer_size, kernel_size, poll_func_str, add_params))
+                layer = Layer.PollingLayer(layer_size, kernel_size, poll_func_str, add_params)
+                self.layers.append(layer)
                 # polling layers haven't associated weights and biases. NaN is stored instead
                 self.weights.append(np.NaN)
                 self.biases.append(np.NaN)
             elif layer_info[0] == 'fcl':
                 # it's a fully connected layer
                 layer_size, act_func_str = layer_info[1], layer_info[2]
-                self.layers.append(Layer.FullyConnectedLayer(layer_size, act_func_str))
+                layer = Layer.FullyConnectedLayer(layer_size, act_func_str)
+                self.layers.append(layer)
                 self.weights.append(np.reshape(np.random.normal(0, 1 / layer_n_el ** 0.5, (layer_size, layer_n_el)),
                                                (layer_size, layer_n_el)))
                 self.biases.append(
                     np.reshape(np.random.normal(0, 1 / layer_n_el ** 0.5, layer_size), (layer_size, 1)))
-                layer_n_el = layer_size
+            layer_size = layer.size
+            layer_n_el = layer.num_neurons
 
     def feedforward(self, x):
         """Perform the feedforward of one observation and return the list of

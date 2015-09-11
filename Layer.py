@@ -65,6 +65,7 @@ class FullyConnectedLayer(Layer):
                              the derivative too
         """
         self.size = size
+        self.num_neurons = size
         self.act_func = getattr(act_functions, act_func_str)
         self.der_act_func = getattr(act_functions, 'der_' + act_func_str)
 
@@ -126,6 +127,7 @@ class ConvolutionalLayer(Layer):
                              the derivative too
         """
         self.size = size
+        self.num_neurons = size ** 2
         self.kernel_size = kernel_size
         self.stride_length = stride_length
         self.act_func = getattr(act_functions, act_func_str)
@@ -190,6 +192,7 @@ class PollingLayer(Layer):
     # N.B. in polling layers stride_length = kernel_size
     def __init__(self, size, kernel_size, poll_func_str, add_params):
         self.size = size
+        self.num_neurons = size ** 2
         self.kernel_size = kernel_size
         self.poll_func = getattr(polling_functions, poll_func_str)
         self.der_poll_func = getattr(polling_functions, 'der_' + poll_func_str)
