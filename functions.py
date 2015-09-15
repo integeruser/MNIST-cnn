@@ -30,8 +30,7 @@ def rect_lin(x):
 
 def der_rect_lin(x):
     """Return the derivative of the rectified linear function"""
-    if (x == 0.0):
-        raise ValueError("derivative of this value does not exist")
+    assert x != 0
     return 1.0 if x > 0 else 0.0
 
 
