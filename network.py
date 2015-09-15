@@ -25,7 +25,7 @@ class NeuralNetwork():
         self.acts:          the activations computed for each layer.
     """
 
-    def __init__(self, layers_info, cost_func_str):
+    def __init__(self, layers_info, cost_func):
         """
         Initialize the data. Initial weights and biases are chosen randomly, according to a gaussian distribution.
         :param layers_info:    it's the vector which stores the info of each layer of the NN. In order to create a
@@ -50,7 +50,7 @@ class NeuralNetwork():
                             'stride length' of a polling layer is equal to its kernel size. Be careful to choose the
                             kernel size such that the kernel correctly fits the layer which is applied to.
                     3. The last element must be chosen accordingly. Usually it's a FCL.
-        :param cost_func_str:  a string with the name of the cost functions applied to the net.
+        :param cost_func:  the cost functions applied to the net
 
         - Usually polling layers are chained to convolutional layers, but in our implementation each layer can be
           chained to any layers, without restriction (though the correctness of the results can't be assured).
@@ -63,7 +63,7 @@ class NeuralNetwork():
         self.layers = []
         self.weights = []
         self.biases = []
-        self.der_cost_func = getattr(functions, 'der_' + cost_func_str)
+        self.der_cost_func = functions.get_derivative(cost_func)
 
         prev_layer_n_el = layers_info[0]
         prev_layer_size = int(prev_layer_n_el ** 0.5)

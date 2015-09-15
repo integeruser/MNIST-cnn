@@ -1,6 +1,24 @@
 import numpy as np
 
 
+def get_derivative(func):
+    derivatives = {
+        sigmoid: der_sigmoid,
+        softmax: der_softmax,
+        rect_lin: der_rect_lin,
+
+        quadratic: der_quadratic,
+        cross_entropy: der_cross_entropy,
+        log_likelihood: der_log_likelihood,
+
+        max: der_max,
+        mean: der_mean,
+        lp_norm: der_lp_norm
+    }
+    assert func in derivatives
+    return derivatives[func]
+
+
 ### activations functions #####################################################
 
 def sigmoid(x):

@@ -71,16 +71,16 @@ class FullyConnectedLayer(Layer):
         self.der_act_func:  the derivative of the activation function
         """
 
-    def __init__(self, size, act_func_str):
+    def __init__(self, size, act_func):
         """Initialize the layer.
         :param size: the number of neurons of the layer
-        :param act_func_str: string representing te activation function (see NeuralNetwork.__init__), used to retrieve
+        :param act_func: string representing te activation function (see NeuralNetwork.__init__), used to retrieve
                              the derivative too
         """
         self.size = size
         self.num_neurons = size
-        self.act_func = getattr(functions, act_func_str)
-        self.der_act_func = getattr(functions, 'der_' + act_func_str)
+        self.act_func = act_func
+        self.der_act_func = functions.get_derivative(act_func)
 
     def feedforward(self, a, w, b):
         """ feedforward the observation through the layer
@@ -131,20 +131,20 @@ class ConvolutionalLayer(Layer):
         self.prev_layer:    a reference to the previous layer in a network needed for certain polling functions
     """
 
-    def __init__(self, size, kernel_size, stride_length, act_func_str):
+    def __init__(self, size, kernel_size, stride_length, act_func):
         """
         :param size:  the side size of the layer (the square root of the number of neurons)
         :param kernel_size: the side size of the kernel
         :param stride_length: the shifting amount of the kernel
-        :param act_func_str: string representing the activation function (see NeuralNetwork.__init__), used to retrieve
+        :param act_func: string representing the activation function (see NeuralNetwork.__init__), used to retrieve
                              the derivative too
         """
         self.size = size
         self.num_neurons = size ** 2
         self.kernel_size = kernel_size
         self.stride_length = stride_length
-        self.act_func = getattr(functions, act_func_str)
-        self.der_act_func = getattr(functions, 'der_' + act_func_str)
+        self.act_func = act_func
+        self.der_act_func = functions.get_derivative(act_func)
 
     def feedforward(self, a, w, b):
         """ feedforward the observation through the layer
@@ -203,12 +203,12 @@ class PollingLayer(Layer):
     """This class represents a polling layer"""
 
     # N.B. in polling layers stride_length = kernel_size
-    def __init__(self, size, kernel_size, poll_func_str, add_params):
+    def __init__(self, size, kernel_size, poll_func, add_params):
         self.size = size
         self.num_neurons = size ** 2
         self.kernel_size = kernel_size
-        self.poll_func = getattr(functions, poll_func_str)
-        self.der_poll_func = getattr(functions, 'der_' + poll_func_str)
+        self.poll_func = poll_func
+        self.der_poll_func = functions.get_derivative(poll_func)
         self.add_params = add_params
 
     def feedforward(self, a, w, b):
