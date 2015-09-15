@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
-__author__ = "F. Cagnin and A. Torcinovich"
-
 import argparse
 
 import numpy as np
 
 import functions
-
 import network
 
 

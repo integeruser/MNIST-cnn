@@ -1,5 +1,3 @@
-__author__ = 'F. Cagnin and A. Torcinovich'
-
 import abc
 
 import numpy as np
