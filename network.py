@@ -148,6 +148,7 @@ def train(net, inputs, num_epochs, batch_size, eta):
     :param batch_size:  the size of the batch used in single cycle of the SGD
     :param eta:         the learning rate
     """
+
     assert eta > 0
     assert len(inputs) % batch_size == 0
 
@@ -157,13 +158,15 @@ def train(net, inputs, num_epochs, batch_size, eta):
 
         np.random.shuffle(inputs)
 
+        # divide input observations into batches of size batch_size
+        batches = [inputs[j:j + batch_size] for j in range(0, len(inputs), batch_size)]
         # for each batch
-        for j in range(0, len(inputs), batch_size):
+        for batch in batches:
             der_weights = [np.zeros(w.shape) if not isinstance(w, float) else np.NaN for w in net.weights]
             der_biases = [np.zeros(b.shape) if not isinstance(b, float) else np.NaN for b in net.biases]
 
             # for each observation in the current batch
-            for x, lab in inputs[j:j + batch_size]:
+            for x, lab in batch:
                 # feedforward the observation
                 net.feedforward(x)
 
@@ -171,7 +174,7 @@ def train(net, inputs, num_epochs, batch_size, eta):
                 y = np.zeros((net.layers[-1].size, 1))
                 y[lab] = 1
                 # backpropagate the error
-                (d_der_ws, d_der_bs) = net.backpropagate(y)
+                d_der_ws, d_der_bs = net.backpropagate(y)
 
                 # sum the derivatives of the weights and biases of the current observation to the previous ones
                 der_weights = [dw + ddw for dw, ddw in zip(der_weights, d_der_ws)]
