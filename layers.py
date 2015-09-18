@@ -44,9 +44,9 @@ class Layer(object):
 
 
 class InputLayer(Layer):
-    def __init__(self, size):
+    def __init__(self, size, squared=False):
         self.size = size
-        self.num_neurons = size ** 2
+        self.num_neurons = size ** 2 if squared else size
 
     def feedforward(self, a, w, b):
         raise NotImplementedError
