@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 
-import numpy as np
-
-import functions
+from layers import *
 import network
 
 
@@ -34,8 +32,11 @@ training_data, validation_data, test_data = load_mnist_dataset(args.dataset_path
 
 print("Generating desired CNN")
 # vec = [784, ("cl", 5, 1, functions.sigmoid), ("pl", 2, functions.mean, None), ("fcl", 100, functions.sigmoid), ("fcl", 10, functions.sigmoid)]
-vec = [784, ("fcl", 100, functions.sigmoid), ("fcl", 10, functions.sigmoid)]
-net = network.NeuralNetwork(vec, functions.quadratic)
+net = network.NeuralNetwork(functions.quadratic, [
+    InputLayer(size=784),
+    FullyConnectedLayer(size=100, act_func=functions.sigmoid),
+    FullyConnectedLayer(size=10, act_func=functions.sigmoid)
+])
 
 print("Training CNN")
 network.train(net, list(training_data), 30, 10, 3.0)

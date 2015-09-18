@@ -1,6 +1,6 @@
 import numpy as np
 
-import layers
+from layers import InputLayer, FullyConnectedLayer
 import functions
 
 
@@ -25,7 +25,7 @@ class NeuralNetwork():
         self.acts:          the activations computed for each layer.
     """
 
-    def __init__(self, layers_info, cost_func):
+    def __init__(self, cost_func, layers):
         """
         Initialize the data. Initial weights and biases are chosen randomly, according to a gaussian distribution.
         :param layers_info:    it's the vector which stores the info of each layer of the NN. In order to create a
@@ -60,45 +60,26 @@ class NeuralNetwork():
         - Possible cost function values: 'quadratic', 'cross_entropy', 'log_likelihood'
         """
 
-        self.layers = []
-        self.weights = []
-        self.biases = []
         self.der_cost_func = functions.get_derivative(cost_func)
 
-        prev_layer_n_el = layers_info[0]
-        prev_layer_size = int(prev_layer_n_el ** 0.5)
-        # this for cycle starts from the second layer (the input layer is given by the user)
-        for layer_info in layers_info[1:]:
-            if layer_info[0] == 'cl':
-                kernel_size, stride_length, act_func_str = layer_info[1], layer_info[2], layer_info[3]
-                layer_size = (prev_layer_size - kernel_size) // stride_length + 1
-                layer = layers.ConvolutionalLayer(layer_size, kernel_size, stride_length, act_func_str)
-                self.layers.append(layer)
-                self.weights.append(np.reshape(np.random.normal(0, 1 / kernel_size, (kernel_size, kernel_size)),
-                                               (kernel_size, kernel_size)))
-                # in any case there is one shared bias, no matter how many layers are in the block
-                self.biases.append(np.random.normal(0, 1 / kernel_size, 1))
-            elif layer_info[0] == 'pl':
-                kernel_size, poll_func_str, add_params = layer_info[1], layer_info[2], layer_info[3]
-                layer_size = prev_layer_size // kernel_size
-                layer = layers.PollingLayer(layer_size, kernel_size, poll_func_str, add_params)
-                self.layers.append(layer)
-                # polling layers haven't associated weights and biases. NaN is stored instead
-                self.weights.append(np.NaN)
-                self.biases.append(np.NaN)
-            elif layer_info[0] == 'fcl':
-                layer_size, act_func_str = layer_info[1], layer_info[2]
-                layer = layers.FullyConnectedLayer(layer_size, act_func_str)
-                self.layers.append(layer)
+        assert len(layers) >= 2
+        assert type(layers[0]) is InputLayer
+        self.input_layer, *self.layers = layers
+
+        self.weights = []
+        self.biases = []
+        prev_layer = self.input_layer
+        for layer in self.layers:
+            if type(layer) is FullyConnectedLayer:
                 self.weights.append(
-                    np.reshape(np.random.normal(0, 1 / prev_layer_n_el ** 0.5, (layer_size, prev_layer_n_el)),
-                               (layer_size, prev_layer_n_el)))
+                    np.reshape(
+                        np.random.normal(0, 1 / prev_layer.num_neurons ** 0.5, (layer.size, prev_layer.num_neurons)),
+                        (layer.size, prev_layer.num_neurons)))
                 self.biases.append(
-                    np.reshape(np.random.normal(0, 1 / prev_layer_n_el ** 0.5, layer_size), (layer_size, 1)))
+                    np.reshape(np.random.normal(0, 1 / prev_layer.num_neurons ** 0.5, layer.size), (layer.size, 1)))
             else:
                 raise NotImplementedError
-            prev_layer_size = layer.size
-            prev_layer_n_el = layer.num_neurons
+            prev_layer = layer
 
     def feedforward(self, x):
         """
