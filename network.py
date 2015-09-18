@@ -16,9 +16,9 @@ class NeuralNetwork():
     ATTRIBUTES
         self.layers:        list containing the layers forming the NN. Each element is a Layer descendants instance (see
                             layers.py).
-        self.weights:       list containing the weights of each layer, according to their nature (for polling layers NaN
+        self.input_weights:       list containing the input_weights of each layer, according to their nature (for polling layers NaN
                             is stored instead).
-        self.biases:        list containing the biases of each layer, according to their nature (for polling layers NaN
+        self.input_biases:        list containing the input_biases of each layer, according to their nature (for polling layers NaN
                             is stored instead).
         self.der_cost_func: the derivative of the cost function used for the backpropagation.
         self.zs:            the zetas computed for each layer.
@@ -27,7 +27,7 @@ class NeuralNetwork():
 
     def __init__(self, cost_func, layers):
         """
-        Initialize the data. Initial weights and biases are chosen randomly, according to a gaussian distribution.
+        Initialize the data. Initial input_weights and input_biases are chosen randomly, according to a gaussian distribution.
         :param layers_info:    it's the vector which stores the info of each layer of the NN. In order to create a
                     correct NN it must be initialized in this way:
                     1. The first element is the size of the input layer. In case of a CNN the image must be n x n.
@@ -66,15 +66,15 @@ class NeuralNetwork():
         assert type(layers[0]) is InputLayer
         self.input_layer, *self.layers = layers
 
-        self.weights = []
-        self.biases = []
+        self.input_weights = dict()
+        self.input_biases = dict()
         prev_layer = self.input_layer
         for layer in self.layers:
             if type(layer) is FullyConnectedLayer:
-                self.weights.append(np.random.normal(0, 1 / prev_layer.num_neurons ** 0.5,
-                                                     size=(layer.size, prev_layer.num_neurons)))
-                self.biases.append(np.random.normal(0, 1 / prev_layer.num_neurons ** 0.5,
-                                                    size=(layer.size, 1)))
+                self.input_weights[layer] = np.random.normal(0, 1 / prev_layer.num_neurons ** 0.5,
+                                                             size=(layer.size, prev_layer.num_neurons))
+                self.input_biases[layer] = np.random.normal(0, 1 / prev_layer.num_neurons ** 0.5,
+                                                            size=(layer.size, 1))
             else:
                 raise NotImplementedError
             prev_layer = layer
@@ -92,7 +92,9 @@ class NeuralNetwork():
         self.acts = [x]
 
         # feedforward the input for each layer
-        for layer, w, b in zip(self.layers, self.weights, self.biases):
+        for layer in self.layers:
+            w = self.input_weights[layer]
+            b = self.input_biases[layer]
             z, a = layer.feedforward(self.acts[-1], w, b)
             self.zs.append(z)
             self.acts.append(a)
@@ -100,18 +102,18 @@ class NeuralNetwork():
 
     def backpropagate(self, y):
         """
-        Perform the backpropagation for one observation and return the derivative of the weights relative to each
+        Perform the backpropagation for one observation and return the derivative of the input_weights relative to each
         layer
         :param y:           the class of the current observation represented in 1-of-k coding
-        :return d_der_ws:   list containing the amount of change in the weights, due to the current observation
-                d_der_bs:   list containing the amount of change in the biases, due to the current observation
+        :return d_der_ws:   list containing the amount of change in the input_weights, due to the current observation
+                d_der_bs:   list containing the amount of change in the input_biases, due to the current observation
         """
 
         d_der_ws = []
         d_der_bs = []
         delta_zlp = self.der_cost_func(self.acts[-1], y) * self.layers[-1].der_act_func(self.zs[-1])
-        for layer, z, a, w in zip(reversed(self.layers), reversed(self.zs[:-1]), reversed(self.acts[:-1]),
-                                  reversed(self.weights)):
+        for layer, z, a in zip(reversed(self.layers), reversed(self.zs[:-1]), reversed(self.acts[:-1])):
+            w = self.input_weights[layer]
             d_der_w, d_der_b, delta_zlp = layer.backpropagate(z, a, w, delta_zlp)
             d_der_ws.insert(0, d_der_w)
             d_der_bs.insert(0, d_der_b)
@@ -141,8 +143,11 @@ def train(net, inputs, num_epochs, batch_size, eta):
         batches = [inputs[j:j + batch_size] for j in range(0, len(inputs), batch_size)]
         # for each batch
         for batch in batches:
-            der_weights = [np.zeros(w.shape) if not isinstance(w, float) else np.NaN for w in net.weights]
-            der_biases = [np.zeros(b.shape) if not isinstance(b, float) else np.NaN for b in net.biases]
+            der_weights = [
+                np.zeros(net.input_weights[l].shape) if not isinstance(net.input_weights[l], float) else np.NaN for l in
+                net.layers]
+            der_biases = [np.zeros(net.input_biases[l].shape) if not isinstance(net.input_biases[l], float) else np.NaN
+                          for l in net.layers]
 
             # for each observation in the current batch
             for x, lab in batch:
@@ -160,8 +165,9 @@ def train(net, inputs, num_epochs, batch_size, eta):
                 der_biases = [db + ddb for db, ddb in zip(der_biases, d_der_bs)]
 
             # update weights and biases with the results of the current batch
-            net.weights = [w - eta / batch_size * dw for w, dw in zip(net.weights, der_weights)]
-            net.biases = [b - eta / batch_size * db for b, db in zip(net.biases, der_biases)]
+            for i, layer in enumerate(net.layers):
+                net.input_weights[layer] -= eta / batch_size * der_weights[i]
+                net.input_biases[layer] -= eta / batch_size * der_biases[i]
 
 
 def test(net, tests):
