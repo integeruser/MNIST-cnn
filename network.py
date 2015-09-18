@@ -71,12 +71,10 @@ class NeuralNetwork():
         prev_layer = self.input_layer
         for layer in self.layers:
             if type(layer) is FullyConnectedLayer:
-                self.weights.append(
-                    np.reshape(
-                        np.random.normal(0, 1 / prev_layer.num_neurons ** 0.5, (layer.size, prev_layer.num_neurons)),
-                        (layer.size, prev_layer.num_neurons)))
-                self.biases.append(
-                    np.reshape(np.random.normal(0, 1 / prev_layer.num_neurons ** 0.5, layer.size), (layer.size, 1)))
+                self.weights.append(np.random.normal(0, 1 / prev_layer.num_neurons ** 0.5,
+                                                     size=(layer.size, prev_layer.num_neurons)))
+                self.biases.append(np.random.normal(0, 1 / prev_layer.num_neurons ** 0.5,
+                                                    size=(layer.size, 1)))
             else:
                 raise NotImplementedError
             prev_layer = layer
