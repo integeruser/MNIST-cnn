@@ -88,17 +88,17 @@ class NeuralNetwork():
         """
 
         # the input layer hasn't zetas and its initial values are considered directly as activations
-        self.zs = [np.NaN]
-        self.acts = [x]
+        zs = [np.NaN]
+        acts = [x]
 
         # feedforward the input for each layer
         for layer in self.layers:
             w = self.input_weights[layer]
             b = self.input_biases[layer]
-            z, a = layer.feedforward(self.acts[-1], w, b)
-            self.zs.append(z)
-            self.acts.append(a)
-        return self.zs, self.acts
+            z, a = layer.feedforward(acts[-1], w, b)
+            zs.append(z)
+            acts.append(a)
+        return zs, acts
 
     def backpropagate(self, batch, eta):
         """
@@ -117,7 +117,7 @@ class NeuralNetwork():
         # for each observation in the current batch
         for x, lab in batch:
             # feedforward the observation
-            self.feedforward(x)
+            zs, acts = self.feedforward(x)
 
             # generate the 1-of-k coding of the current observation class
             y = np.zeros((self.layers[-1].size, 1))
@@ -125,8 +125,8 @@ class NeuralNetwork():
             # backpropagate the error
             d_der_ws = []
             d_der_bs = []
-            delta_zlp = self.der_cost_func(self.acts[-1], y) * self.layers[-1].der_act_func(self.zs[-1])
-            for layer, z, a in zip(reversed(self.layers), reversed(self.zs[:-1]), reversed(self.acts[:-1])):
+            delta_zlp = self.der_cost_func(acts[-1], y) * self.layers[-1].der_act_func(zs[-1])
+            for layer, z, a in zip(reversed(self.layers), reversed(zs[:-1]), reversed(acts[:-1])):
                 w = self.input_weights[layer]
                 d_der_w, d_der_b, delta_zlp = layer.backpropagate(z, a, w, delta_zlp)
                 d_der_ws.insert(0, d_der_w)
