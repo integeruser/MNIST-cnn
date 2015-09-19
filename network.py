@@ -63,7 +63,7 @@ class NeuralNetwork():
         self.der_cost_func = functions.get_derivative(cost_func)
 
         assert len(layers) >= 2
-        assert type(layers[0]) is InputLayer
+        assert isinstance(layers[0], InputLayer)
         self.input_layer, *self.layers = layers
 
         self.input_weights = dict()

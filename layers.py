@@ -15,17 +15,37 @@ class Layer(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
 
+###############################################################################
+
 class InputLayer(Layer):
-    def __init__(self, size, squared=False):
+    pass
+
+
+class VerticalInputLayer(InputLayer):
+    def __init__(self, size):
         self.size = size
-        self.num_neurons = size ** 2 if squared else size
+        self.num_neurons = size
 
-    def feedforward(self, a, w, b):
+    def feedforward(self):
         raise NotImplementedError
 
-    def backpropagate(self, z, a, w, delta_zlp):
+    def backpropagate(self):
         raise NotImplementedError
 
+
+class SquaredInputLayer(InputLayer):
+    def __init__(self, size):
+        self.size = size
+        self.num_neurons = size ** 2
+
+    def feedforward(self):
+        raise NotImplementedError
+
+    def backpropagate(self):
+        raise NotImplementedError
+
+
+###############################################################################
 
 class FullyConnectedLayer(Layer):
     """
