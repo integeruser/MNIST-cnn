@@ -5,41 +5,13 @@ import numpy as np
 import functions
 
 
-class Layer(object):
-    """
-    NAME
-        Layer
-
-    DESCRIPTION
-        This class represents a general network layer, which must specify its size, and must implement a feedforward and
-        backpropagation method
-
-    ATTRIBUTES
-    size (abstract property):   the size of the layer. It can have different meaning, depending on the nature of the
-                                layer
-    """
-    __metaclass__ = abc.ABCMeta
-
-    @abc.abstractproperty
-    def size(self):
-        raise NotImplementedError
-
-    @size.getter
-    def size(self):
-        return self._size
-
-    @size.setter
-    def size(self, value):
-        self._size = value
-
+class Layer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    def feedforward(self, a, w, b):
-        """feed forward the observation in the current layer"""
+    def feedforward(self):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def backpropagate(self, z, a, w, delta_zlp):
-        """backpropagate the error in the current layer"""
+    def backpropagate(self):
         raise NotImplementedError
 
 
