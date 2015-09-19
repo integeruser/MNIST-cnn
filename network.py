@@ -100,7 +100,7 @@ class NeuralNetwork():
             self.acts.append(a)
         return self.zs, self.acts
 
-    def backpropagate(self, y):
+    def backpropagate(self, batch, eta):
         """
         Perform the backpropagation for one observation and return the derivative of the input_weights relative to each
         layer
@@ -109,15 +109,37 @@ class NeuralNetwork():
                 d_der_bs:   list containing the amount of change in the input_biases, due to the current observation
         """
 
-        d_der_ws = []
-        d_der_bs = []
-        delta_zlp = self.der_cost_func(self.acts[-1], y) * self.layers[-1].der_act_func(self.zs[-1])
-        for layer, z, a in zip(reversed(self.layers), reversed(self.zs[:-1]), reversed(self.acts[:-1])):
-            w = self.input_weights[layer]
-            d_der_w, d_der_b, delta_zlp = layer.backpropagate(z, a, w, delta_zlp)
-            d_der_ws.insert(0, d_der_w)
-            d_der_bs.insert(0, d_der_b)
-        return d_der_ws, d_der_bs
+        der_weights = [np.zeros(self.input_weights[l].shape) if not isinstance(self.input_weights[l], float) else np.NaN
+                       for l in self.layers]
+        der_biases = [np.zeros(self.input_biases[l].shape) if not isinstance(self.input_biases[l], float) else np.NaN
+                      for l in self.layers]
+
+        # for each observation in the current batch
+        for x, lab in batch:
+            # feedforward the observation
+            self.feedforward(x)
+
+            # generate the 1-of-k coding of the current observation class
+            y = np.zeros((self.layers[-1].size, 1))
+            y[lab] = 1
+            # backpropagate the error
+            d_der_ws = []
+            d_der_bs = []
+            delta_zlp = self.der_cost_func(self.acts[-1], y) * self.layers[-1].der_act_func(self.zs[-1])
+            for layer, z, a in zip(reversed(self.layers), reversed(self.zs[:-1]), reversed(self.acts[:-1])):
+                w = self.input_weights[layer]
+                d_der_w, d_der_b, delta_zlp = layer.backpropagate(z, a, w, delta_zlp)
+                d_der_ws.insert(0, d_der_w)
+                d_der_bs.insert(0, d_der_b)
+
+            # sum the derivatives of the weights and biases of the current observation to the previous ones
+            der_weights = [dw + ddw for dw, ddw in zip(der_weights, d_der_ws)]
+            der_biases = [db + ddb for db, ddb in zip(der_biases, d_der_bs)]
+
+        # update weights and biases with the results of the current batch
+        for i, layer in enumerate(self.layers):
+            self.input_weights[layer] -= eta / len(batch) * der_weights[i]
+            self.input_biases[layer] -= eta / len(batch) * der_biases[i]
 
 
 def train(net, inputs, num_epochs, batch_size, eta):
@@ -133,7 +155,6 @@ def train(net, inputs, num_epochs, batch_size, eta):
     assert eta > 0
     assert len(inputs) % batch_size == 0
 
-    # for each epoch
     for i in range(num_epochs):
         print("Epoch {}".format(i + 1))
 
@@ -141,33 +162,8 @@ def train(net, inputs, num_epochs, batch_size, eta):
 
         # divide input observations into batches of size batch_size
         batches = [inputs[j:j + batch_size] for j in range(0, len(inputs), batch_size)]
-        # for each batch
         for batch in batches:
-            der_weights = [
-                np.zeros(net.input_weights[l].shape) if not isinstance(net.input_weights[l], float) else np.NaN for l in
-                net.layers]
-            der_biases = [np.zeros(net.input_biases[l].shape) if not isinstance(net.input_biases[l], float) else np.NaN
-                          for l in net.layers]
-
-            # for each observation in the current batch
-            for x, lab in batch:
-                # feedforward the observation
-                net.feedforward(x)
-
-                # generate the 1-of-k coding of the current observation class
-                y = np.zeros((net.layers[-1].size, 1))
-                y[lab] = 1
-                # backpropagate the error
-                d_der_ws, d_der_bs = net.backpropagate(y)
-
-                # sum the derivatives of the weights and biases of the current observation to the previous ones
-                der_weights = [dw + ddw for dw, ddw in zip(der_weights, d_der_ws)]
-                der_biases = [db + ddb for db, ddb in zip(der_biases, d_der_bs)]
-
-            # update weights and biases with the results of the current batch
-            for i, layer in enumerate(net.layers):
-                net.input_weights[layer] -= eta / batch_size * der_weights[i]
-                net.input_biases[layer] -= eta / batch_size * der_biases[i]
+            net.backpropagate(batch, eta)
 
 
 def test(net, tests):
