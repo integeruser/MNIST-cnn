@@ -176,6 +176,8 @@ def test(net, tests):
 
     perf = 0
     for x, lab in tests:
+        x = np.reshape(x, (x.size, 1))
+
         # retrieve the index of the output neuron with the maximum activation
         res = np.argmax(net.feedforward(x)[1][-1])
         if lab == res: perf += 1
