@@ -85,19 +85,18 @@ class FullyConnectedLayer(Layer):
         return z, self.act_func(z)
 
     def backpropagate(self, z, a, w, delta_zlp):
-        """backpropagate the error through the layer
-        :param z: the zetas of this layer
-        :param a: the activations of this layer
+        """
+        Backpropagate the error through the layer.
+
+        :param z: the zetas of this layer (computed during feedforward)
+        :param a: the activations of this layer (computed during feedforward)
         :param w: the weights associated to this layer and the previous one
         :param delta_zlp: the error propagated by the previous layer
-        :return d_der_w: the amount of change of the weights under consideration
-                delta_zlp: the amount of change of the biases under consideration
-                delta_zl:  the error propagated by this layer
+        :returns: the amount of change of the weights under consideration, the amount of change of the biases under
+            consideration and the error propagated by this layer
         """
-        # compute the derivatives of the weights and biases. N.B. reshape also takes care to transpose a
-        d_der_w = np.dot(delta_zlp, np.reshape(a, (1, a.size)))
-        # d_der_b = delta_zlp
-        # propagate the error for the next layer only if the next layer is not the input one
-        delta_zl = np.dot(w.transpose(), delta_zlp) * self.der_act_func(
-            np.reshape(z, (z.shape[0] * z.shape[1], 1))) if not isinstance(z, float) else np.NaN
+        # compute the derivatives of the weights and biases
+        d_der_w = np.dot(delta_zlp, a.T)
+        # propagate the error for the next layer
+        delta_zl = np.dot(w.T, delta_zlp) * self.der_act_func(z)
         return d_der_w, delta_zlp, delta_zl

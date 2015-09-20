@@ -88,7 +88,7 @@ class NeuralNetwork():
         """
 
         # the input layer hasn't zetas and its initial values are considered directly as activations
-        zs = [np.NaN]
+        zs = [np.empty(shape=(1, 1))]
         acts = [x]
 
         # feedforward the input for each layer
@@ -109,10 +109,8 @@ class NeuralNetwork():
                 d_der_bs:   list containing the amount of change in the input_biases, due to the current observation
         """
 
-        der_weights = [np.zeros(self.input_weights[l].shape) if not isinstance(self.input_weights[l], float) else np.NaN
-                       for l in self.layers]
-        der_biases = [np.zeros(self.input_biases[l].shape) if not isinstance(self.input_biases[l], float) else np.NaN
-                      for l in self.layers]
+        der_weights = [np.zeros(self.input_weights[l].shape) for l in self.layers]
+        der_biases = [np.zeros(self.input_biases[l].shape) for l in self.layers]
 
         # for each observation in the current batch
         for x, lab in batch:
