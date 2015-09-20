@@ -116,6 +116,8 @@ class NeuralNetwork():
 
         # for each observation in the current batch
         for x, lab in batch:
+            x = np.reshape(x, (x.size, 1))
+
             # feedforward the observation
             zs, acts = self.feedforward(x)
 
