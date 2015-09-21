@@ -109,8 +109,8 @@ class NeuralNetwork():
                 d_der_bs:   list containing the amount of change in the input_biases, due to the current observation
         """
 
-        der_weights = [np.zeros(self.input_weights[l].shape) for l in self.layers]
-        der_biases = [np.zeros(self.input_biases[l].shape) for l in self.layers]
+        der_weights = {layer: np.zeros(self.input_weights[layer].shape) for layer in self.layers}
+        der_biases = {layer: np.zeros(self.input_biases[layer].shape) for layer in self.layers}
 
         # for each observation in the current batch
         for x, lab in batch:
@@ -123,23 +123,24 @@ class NeuralNetwork():
             y = np.zeros((self.layers[-1].size, 1))
             y[lab] = 1
             # backpropagate the error
-            d_der_ws = []
-            d_der_bs = []
+            d_der_ws = {}
+            d_der_bs = {}
             delta_zlp = self.der_cost_func(acts[-1], y) * self.layers[-1].der_act_func(zs[-1])
             for layer, z, a in zip(reversed(self.layers), reversed(zs[:-1]), reversed(acts[:-1])):
                 w = self.input_weights[layer]
                 d_der_w, d_der_b, delta_zlp = layer.backpropagate(z, a, w, delta_zlp)
-                d_der_ws.insert(0, d_der_w)
-                d_der_bs.insert(0, d_der_b)
+                d_der_ws[layer] = d_der_w
+                d_der_bs[layer] = d_der_b
 
             # sum the derivatives of the weights and biases of the current observation to the previous ones
-            der_weights = [dw + ddw for dw, ddw in zip(der_weights, d_der_ws)]
-            der_biases = [db + ddb for db, ddb in zip(der_biases, d_der_bs)]
+            for layer in self.layers:
+                der_weights[layer] += d_der_ws[layer]
+                der_biases[layer] += d_der_bs[layer]
 
         # update weights and biases with the results of the current batch
-        for i, layer in enumerate(self.layers):
-            self.input_weights[layer] -= eta / len(batch) * der_weights[i]
-            self.input_biases[layer] -= eta / len(batch) * der_biases[i]
+        for layer in self.layers:
+            self.input_weights[layer] -= eta / len(batch) * der_weights[layer]
+            self.input_biases[layer] -= eta / len(batch) * der_biases[layer]
 
 
 def train(net, inputs, num_epochs, batch_size, eta):
