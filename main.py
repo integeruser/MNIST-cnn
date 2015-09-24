@@ -2,7 +2,6 @@
 import argparse
 
 from layers import *
-
 import network
 
 
@@ -32,11 +31,11 @@ print("Loading data")
 training_data, validation_data, test_data = load_mnist_dataset(args.dataset_path)
 
 print("Generating desired CNN")
-net = network.NeuralNetwork(functions.quadratic, [
+net = network.NeuralNetwork([
     VerticalInputLayer(size=784),
     FullyConnectedLayer(size=100, act_func=functions.sigmoid),
     FullyConnectedLayer(size=10, act_func=functions.sigmoid)
-])
+], functions.quadratic)
 
 print("Training CNN")
 network.train(net, list(training_data), 30, 10, 3.0)

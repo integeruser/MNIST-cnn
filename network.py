@@ -25,7 +25,7 @@ class NeuralNetwork():
         self.acts:          the activations computed for each layer.
     """
 
-    def __init__(self, cost_func, layers):
+    def __init__(self, layers, cost_func):
         """
         Initialize the data. Initial input_weights and input_biases are chosen randomly, according to a gaussian distribution.
         :param layers_info:    it's the vector which stores the info of each layer of the NN. In order to create a
@@ -60,8 +60,6 @@ class NeuralNetwork():
         - Possible cost function values: 'quadratic', 'cross_entropy', 'log_likelihood'
         """
 
-        self.der_cost_func = functions.get_derivative(cost_func)
-
         assert len(layers) >= 2
         assert isinstance(layers[0], InputLayer)
         self.input_layer, *self.layers = layers
@@ -78,6 +76,8 @@ class NeuralNetwork():
             else:
                 raise NotImplementedError
             prev_layer = layer
+
+        self.der_cost_func = functions.get_derivative(cost_func)
 
     def feedforward(self, x):
         """
