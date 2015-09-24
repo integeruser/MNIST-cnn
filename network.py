@@ -113,15 +113,13 @@ class NeuralNetwork():
         der_biases = {layer: np.zeros(self.input_biases[layer].shape) for layer in self.layers}
 
         # for each observation in the current batch
-        for x, lab in batch:
+        for x, y in batch:
             x = np.reshape(x, (x.size, 1))
+            y = np.reshape(y, (y.size, 1))
 
             # feedforward the observation
             zs, acts = self.feedforward(x)
 
-            # generate the 1-of-k coding of the current observation class
-            y = np.zeros((self.layers[-1].size, 1))
-            y[lab] = 1
             # backpropagate the error
             d_der_ws = {}
             d_der_bs = {}
@@ -174,11 +172,11 @@ def test(net, tests):
     """
 
     perf = 0
-    for x, lab in tests:
+    for x, y in tests:
         x = np.reshape(x, (x.size, 1))
+        y = np.reshape(y, (y.size, 1))
 
-        # retrieve the index of the output neuron with the maximum activation
-        res = np.argmax(net.feedforward(x)[1][-1])
-        if lab == res: perf += 1
+        res = net.feedforward(x)[1][-1]
+        if np.argmax(res) == np.argmax(y): perf += 1
 
     print("{} correctly classified observations ({}%)".format(perf, 100 * perf / len(tests)))

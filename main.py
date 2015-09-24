@@ -6,18 +6,25 @@ import network
 
 
 def load_mnist_dataset(dataset_path):
-    # temporary function used to load the mnist data set
     import gzip
     import pickle
+
+    def to_categorical(y):
+        y = np.asarray(y, dtype="int32")
+        nb_classes = np.max(y) + 1
+        Y = np.zeros((len(y), nb_classes))
+        for i in range(len(y)):
+            Y[i, y[i]] = 1.
+        return Y
 
     with gzip.open(dataset_path, "rb") as f:
         tr_d, va_d, te_d = pickle.load(f, encoding="latin1")
         training_inputs = [np.reshape(x, (28, 28)) for x in tr_d[0]]
-        training_data = zip(training_inputs, [y for y in tr_d[1]])
+        training_data = zip(training_inputs, to_categorical(tr_d[1]))
         validation_inputs = [np.reshape(x, (28, 28)) for x in va_d[0]]
         validation_data = zip(validation_inputs, va_d[1])
         test_inputs = [np.reshape(x, (28, 28)) for x in te_d[0]]
-        test_data = zip(test_inputs, te_d[1])
+        test_data = zip(test_inputs, to_categorical(te_d[1]))
         return training_data, validation_data, test_data
 
 
