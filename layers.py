@@ -42,19 +42,19 @@ class FullyConnectedLayer(Layer):
 
     def feedforward(self, a, w, b):
         """
-        Feedforward the observation through the layer.
+        Feedforward the observation through the layer
 
-        :param a: the activations of the previous layer (shape: (n, 1))
-        :param w: the weights connecting this layer with the previous one (shape: (m, n))
-        :param b: the bias associated to this layer (shape: (m, 1))
-        :returns: zetas and activations of this layer (shape: (m, 1))
+        :param a: the activations of the previous layer
+        :param w: the weights connecting this layer with the previous one
+        :param b: the bias associated to this layer
+        :returns: zeta and activation of this layer
         """
         z = np.dot(w, a) + b
         return z, self.act_func(z)
 
     def backpropagate(self, z, a, w, delta_zlp):
         """
-        Backpropagate the error through the layer.
+        Backpropagate the error through the layer
 
         :param z: the zetas of this layer (computed during feedforward)
         :param a: the activations of this layer (computed during feedforward)
