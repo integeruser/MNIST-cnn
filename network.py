@@ -129,7 +129,7 @@ def test(net, tests):
         x = np.reshape(x, (x.size, 1))
         y = np.reshape(y, (y.size, 1))
 
-        res = net.feedforward(x)[1][-1]
+        res = net.feedforward(x)[1][net.layers[-1]]
         if np.argmax(res) == np.argmax(y): perf += 1
 
     print("{} correctly classified observations ({}%)".format(perf, 100 * perf / len(tests)))
