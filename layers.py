@@ -6,6 +6,10 @@ import functions
 
 
 class Layer(metaclass=abc.ABCMeta):
+    def __init__(self, n_in, n_out):
+        self.n_in = n_in
+        self.n_out = n_out
+
     @abc.abstractmethod
     def feedforward(self):
         raise NotImplementedError
@@ -18,25 +22,8 @@ class Layer(metaclass=abc.ABCMeta):
 ###############################################################################
 
 class InputLayer(Layer):
-    pass
-
-
-class VerticalInputLayer(InputLayer):
-    def __init__(self, size):
-        self.size = size
-        self.num_neurons = size
-
-    def feedforward(self):
-        raise NotImplementedError
-
-    def backpropagate(self):
-        raise NotImplementedError
-
-
-class SquaredInputLayer(InputLayer):
-    def __init__(self, size):
-        self.size = size
-        self.num_neurons = size ** 2
+    def __init__(self, n_in, n_out):
+        super().__init__(n_in, n_out)
 
     def feedforward(self):
         raise NotImplementedError
@@ -48,27 +35,8 @@ class SquaredInputLayer(InputLayer):
 ###############################################################################
 
 class FullyConnectedLayer(Layer):
-    """
-    NAME
-        FullyConnectedLayer
-
-    DESCRIPTION
-        This class implements a fully connected layer
-
-    ATTRIBUTES
-        self.size:          the number of neurons of the layer
-        self.act_func:      the activation function
-        self.der_act_func:  the derivative of the activation function
-        """
-
-    def __init__(self, size, act_func):
-        """Initialize the layer.
-        :param size: the number of neurons of the layer
-        :param act_func: string representing te activation function (see NeuralNetwork.__init__), used to retrieve
-                             the derivative too
-        """
-        self.size = size
-        self.num_neurons = size
+    def __init__(self, n_in, n_out, act_func):
+        super().__init__(n_in, n_out)
         self.act_func = act_func
         self.der_act_func = functions.get_derivative(act_func)
 
