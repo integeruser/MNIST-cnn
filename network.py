@@ -1,20 +1,20 @@
 import numpy as np
 
-from layers import InputLayer, FullyConnectedLayer
+from layers import FullyConnectedLayer
 import functions
 
 
 class NeuralNetwork():
-    def __init__(self, layers, cost_func):
+    def __init__(self, input_layer, layers, cost_func):
         """
         Initialize the data. Initial input_weights and input_biases are chosen randomly from a gaussian distribution.
 
         :param layers: a vector which stores each layer of the NN.
         :param cost_func: the cost function applied to the net
         """
-        assert len(layers) >= 2
-        assert isinstance(layers[0], InputLayer)
-        self.input_layer, *self.layers = layers
+        self.input_layer = input_layer
+        self.layers = layers
+        self.der_cost_func = functions.get_derivative(cost_func)
 
         self.input_weights = {}
         self.input_biases = {}
@@ -28,8 +28,6 @@ class NeuralNetwork():
             else:
                 raise NotImplementedError
             prev_layer = layer
-
-        self.der_cost_func = functions.get_derivative(cost_func)
 
     def feedforward(self, x):
         """
