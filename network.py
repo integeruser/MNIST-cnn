@@ -88,16 +88,18 @@ class NeuralNetwork():
         """
 
         # the input layer hasn't zetas and its initial values are considered directly as activations
-        zs = [np.empty(shape=(1, 1))]
-        acts = [x]
+        zs = {self.input_layer: np.empty(shape=(1, 1))}
+        acts = {self.input_layer: x}
 
         # feedforward the input for each layer
+        prev_layer = self.input_layer
         for layer in self.layers:
             w = self.input_weights[layer]
             b = self.input_biases[layer]
-            z, a = layer.feedforward(acts[-1], w, b)
-            zs.append(z)
-            acts.append(a)
+            z, a = layer.feedforward(acts[prev_layer], w, b)
+            zs[layer] = z
+            acts[layer] = a
+            prev_layer = layer
         return zs, acts
 
     def backpropagate(self, batch, eta):
@@ -121,10 +123,16 @@ class NeuralNetwork():
             zs, acts = self.feedforward(x)
 
             # backpropagate the error
+            output_layer = self.layers[-1]
+            delta_zlp = self.der_cost_func(acts[output_layer], y) * output_layer.der_act_func(zs[output_layer])
+
             d_der_ws = {}
             d_der_bs = {}
-            delta_zlp = self.der_cost_func(acts[-1], y) * self.layers[-1].der_act_func(zs[-1])
-            for layer, z, a in zip(reversed(self.layers), reversed(zs[:-1]), reversed(acts[:-1])):
+            for i, layer in enumerate(reversed(self.layers)):
+                j = len(self.layers) - 1 - i - 1
+                prev_layer = self.layers[j] if j >= 0 else self.input_layer
+                z = zs[prev_layer]
+                a = acts[prev_layer]
                 w = self.input_weights[layer]
                 d_der_w, d_der_b, delta_zlp = layer.backpropagate(z, a, w, delta_zlp)
                 d_der_ws[layer] = d_der_w
