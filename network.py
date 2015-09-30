@@ -51,8 +51,7 @@ class NeuralNetwork():
 
     def backpropagate(self, batch, eta):
         """
-        Perform the backpropagation for one observation and return the derivative of the input_weights relative to each
-        layer
+        Perform the backpropagation for one observation and return the derivative of the input_weights relative to each layer
 
         :param y: the class of the current observation represented in 1-of-k coding
         """
@@ -61,9 +60,6 @@ class NeuralNetwork():
 
         # for each observation in the current batch
         for x, y in batch:
-            x = np.reshape(x, (x.size, 1))
-            y = np.reshape(y, (y.size, 1))
-
             # feedforward the observation
             zs, acts = self.feedforward(x)
 
@@ -126,9 +122,6 @@ def test(net, tests):
     """
     perf = 0
     for x, y in tests:
-        x = np.reshape(x, (x.size, 1))
-        y = np.reshape(y, (y.size, 1))
-
         res = net.feedforward(x)[1][net.layers[-1]]
         if np.argmax(res) == np.argmax(y): perf += 1
 
