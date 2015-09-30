@@ -37,7 +37,7 @@ class NeuralNetwork():
         :returns: the zetas and the activations of each layer
         """
         # the input layer hasn't zetas and its initial values are considered directly as activations
-        zs = {self.input_layer: np.empty(shape=(1, 1))}
+        zs = {self.input_layer: np.array([])}
         acts = {self.input_layer: x}
 
         # feedforward the input for each layer
