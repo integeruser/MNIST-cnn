@@ -10,7 +10,7 @@ class Layer(metaclass=abc.ABCMeta):
         self.width = width
         self.height = height
         self.depth = depth
-        self.n_out = width * height * depth
+        self.num_neurons_out = width * height * depth
 
     @abc.abstractmethod
     def feedforward(self):
@@ -69,5 +69,5 @@ class FullyConnectedLayer(Layer):
         d_der_w = np.dot(delta_zlp, a.T)
         d_der_b = delta_zlp
         # propagate the error for the next layer
-        delta_zl = np.dot(w.T, d_der_b) * self.der_act_func(z)
+        delta_zl = np.dot(w.T, delta_zlp) * self.der_act_func(z)
         return d_der_w, delta_zlp, delta_zl
