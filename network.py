@@ -54,6 +54,7 @@ class NeuralNetwork():
 
         :param y: the class of the current observation represented in 1-of-k coding
         """
+        # store the derivatives of the input weights and biases of each layer, computed during batch processing
         der_weights = {layer: np.zeros(self.input_weights[layer].shape) for layer in self.layers}
         der_biases = {layer: np.zeros(self.input_biases[layer].shape) for layer in self.layers}
 
@@ -66,8 +67,6 @@ class NeuralNetwork():
             output_layer = self.layers[-1]
             delta_zlp = self.der_cost_func(output_layer.a, y) * output_layer.der_act_func(output_layer.z)
 
-            d_der_ws = {}
-            d_der_bs = {}
             for i, layer in enumerate(reversed(self.layers)):
                 j = len(self.layers) - 1 - i - 1
                 prev_layer = self.layers[j] if j >= 0 else self.input_layer
@@ -75,13 +74,8 @@ class NeuralNetwork():
                 input_a = prev_layer.a
                 input_w = self.input_weights[layer]
                 d_der_w, d_der_b, delta_zlp = layer.backpropagate(input_z, input_a, input_w, delta_zlp)
-                d_der_ws[layer] = d_der_w
-                d_der_bs[layer] = d_der_b
-
-            # sum the derivatives of the weights and biases of the current observation to the previous ones
-            for layer in self.layers:
-                der_weights[layer] += d_der_ws[layer]
-                der_biases[layer] += d_der_bs[layer]
+                der_weights[layer] += d_der_w
+                der_biases[layer] += d_der_b
 
         # update weights and biases with the results of the current batch
         for layer in self.layers:
