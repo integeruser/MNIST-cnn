@@ -11,6 +11,8 @@ class Layer(metaclass=abc.ABCMeta):
         self.height = height
         self.depth = depth
         self.num_neurons_out = width * height * depth
+        self.z = None
+        self.a = None
 
     @abc.abstractmethod
     def feedforward(self):
@@ -49,10 +51,9 @@ class FullyConnectedLayer(Layer):
         :param a: the activations of the previous layer
         :param w: the weights connecting this layer with the previous one
         :param b: the bias associated to this layer
-        :returns: zeta and activation of this layer
         """
-        z = np.dot(w, a) + b
-        return z, self.act_func(z)
+        self.z = np.dot(w, a) + b
+        self.a = self.act_func(self.z)
 
     def backpropagate(self, z, a, w, delta_zlp):
         """

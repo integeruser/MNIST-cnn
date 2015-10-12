@@ -34,20 +34,18 @@ class NeuralNetwork():
         Perform the feedforward of one observation and return the list of z and activations of each layer
 
         :param x: the observation taken as input layer
-        :returns: the zetas and the activations of each layer
         """
         # the input layer hasn't zetas and its initial values are considered directly as activations
-        zs = {self.input_layer: np.array([])}
-        acts = {self.input_layer: x}
+        self.input_layer.z = np.array([])
+        self.input_layer.a = x
 
         # feedforward the input for each layer
         prev_layer = self.input_layer
         for layer in self.layers:
             w = self.input_weights[layer]
             b = self.input_biases[layer]
-            zs[layer], acts[layer] = layer.feedforward(acts[prev_layer], w, b)
+            layer.feedforward(prev_layer.a, w, b)
             prev_layer = layer
-        return zs, acts
 
     def backpropagate(self, batch, eta):
         """
@@ -61,21 +59,19 @@ class NeuralNetwork():
         # for each observation in the current batch
         for x, y in batch:
             # feedforward the observation
-            zs, acts = self.feedforward(x)
+            self.feedforward(x)
 
             # backpropagate the error
             output_layer = self.layers[-1]
-            delta_zlp = self.der_cost_func(acts[output_layer], y) * output_layer.der_act_func(zs[output_layer])
+            delta_zlp = self.der_cost_func(output_layer.a, y) * output_layer.der_act_func(output_layer.z)
 
             d_der_ws = {}
             d_der_bs = {}
             for i, layer in enumerate(reversed(self.layers)):
                 j = len(self.layers) - 1 - i - 1
                 prev_layer = self.layers[j] if j >= 0 else self.input_layer
-                z = zs[prev_layer]
-                a = acts[prev_layer]
                 w = self.input_weights[layer]
-                d_der_w, d_der_b, delta_zlp = layer.backpropagate(z, a, w, delta_zlp)
+                d_der_w, d_der_b, delta_zlp = layer.backpropagate(prev_layer.z, prev_layer.a, w, delta_zlp)
                 d_der_ws[layer] = d_der_w
                 d_der_bs[layer] = d_der_b
 
@@ -122,7 +118,8 @@ def test(net, tests):
     """
     perf = 0
     for x, y in tests:
-        res = net.feedforward(x)[1][net.layers[-1]]
+        net.feedforward(x)
+        res = net.layers[-1].a
         if np.argmax(res) == np.argmax(y): perf += 1
 
     print("{} correctly classified observations ({}%)".format(perf, 100 * perf / len(tests)))
