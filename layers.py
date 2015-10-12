@@ -6,9 +6,11 @@ import functions
 
 
 class Layer(metaclass=abc.ABCMeta):
-    def __init__(self, n_in, n_out):
-        self.n_in = n_in
-        self.n_out = n_out
+    def __init__(self, width, height, depth):
+        self.width = width
+        self.height = height
+        self.depth = depth
+        self.n_out = width * height * depth
 
     @abc.abstractmethod
     def feedforward(self):
@@ -22,8 +24,8 @@ class Layer(metaclass=abc.ABCMeta):
 ###############################################################################
 
 class InputLayer(Layer):
-    def __init__(self, n_in, n_out):
-        super().__init__(n_in, n_out)
+    def __init__(self, width, height):
+        super().__init__(width, height, depth=1)
 
     def feedforward(self):
         raise NotImplementedError
@@ -35,8 +37,8 @@ class InputLayer(Layer):
 ###############################################################################
 
 class FullyConnectedLayer(Layer):
-    def __init__(self, n_in, n_out, act_func):
-        super().__init__(n_in, n_out)
+    def __init__(self, width, height, act_func):
+        super().__init__(width, height, depth=1)
         self.act_func = act_func
         self.der_act_func = functions.get_derivative(act_func)
 

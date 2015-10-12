@@ -38,9 +38,9 @@ print("Loading data")
 training_data, validation_data, test_data = load_mnist_dataset(args.dataset_path)
 
 print("Generating desired CNN")
-net = network.NeuralNetwork(InputLayer(n_in=28 * 28, n_out=28 * 28), [
-    FullyConnectedLayer(n_in=28 * 28, n_out=100, act_func=functions.sigmoid),
-    FullyConnectedLayer(n_in=100, n_out=10, act_func=functions.sigmoid)
+net = network.NeuralNetwork(InputLayer(width=28, height=28), [
+    FullyConnectedLayer(width=1, height=100, act_func=functions.sigmoid),
+    FullyConnectedLayer(width=1, height=10, act_func=functions.sigmoid)
 ], functions.quadratic)
 
 print("Training CNN")
