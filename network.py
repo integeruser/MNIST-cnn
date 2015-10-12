@@ -42,9 +42,10 @@ class NeuralNetwork():
         # feedforward the input for each layer
         prev_layer = self.input_layer
         for layer in self.layers:
-            w = self.input_weights[layer]
-            b = self.input_biases[layer]
-            layer.feedforward(prev_layer.a, w, b)
+            input_a = prev_layer.a
+            input_w = self.input_weights[layer]
+            input_b = self.input_biases[layer]
+            layer.feedforward(input_a, input_w, input_b)
             prev_layer = layer
 
     def backpropagate(self, batch, eta):
@@ -70,8 +71,10 @@ class NeuralNetwork():
             for i, layer in enumerate(reversed(self.layers)):
                 j = len(self.layers) - 1 - i - 1
                 prev_layer = self.layers[j] if j >= 0 else self.input_layer
-                w = self.input_weights[layer]
-                d_der_w, d_der_b, delta_zlp = layer.backpropagate(prev_layer.z, prev_layer.a, w, delta_zlp)
+                input_z = prev_layer.z
+                input_a = prev_layer.a
+                input_w = self.input_weights[layer]
+                d_der_w, d_der_b, delta_zlp = layer.backpropagate(input_z, input_a, input_w, delta_zlp)
                 d_der_ws[layer] = d_der_w
                 d_der_bs[layer] = d_der_b
 
