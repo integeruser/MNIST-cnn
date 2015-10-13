@@ -16,11 +16,11 @@ class Layer(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def feedforward(self):
-        raise NotImplementedError
+        raise AssertionError
 
     @abc.abstractmethod
     def backpropagate(self):
-        raise NotImplementedError
+        raise AssertionError
 
 
 ###############################################################################
@@ -30,10 +30,10 @@ class InputLayer(Layer):
         super().__init__(width, height, depth=1)
 
     def feedforward(self):
-        raise NotImplementedError
+        raise AssertionError
 
     def backpropagate(self):
-        raise NotImplementedError
+        raise AssertionError
 
 
 ###############################################################################
