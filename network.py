@@ -7,10 +7,10 @@ import functions
 class NeuralNetwork():
     def __init__(self, layers, cost_func):
         """
-        Initialize the data. Initial input_weights and input_biases are chosen randomly from a gaussian distribution.
+        Initialize the data. Initial weights and biases are chosen randomly from a gaussian distribution
 
-        :param layers: a vector which stores each layer of the NN.
-        :param cost_func: the cost function applied to the net
+        :param layers: a vector which stores each layer of the network
+        :param cost_func: the cost function applied to the network
         """
         assert len(layers) > 0
         self.input_layer = layers[0]
@@ -49,9 +49,10 @@ class NeuralNetwork():
 
     def backpropagate(self, batch, eta):
         """
-        Perform the backpropagation for one observation and return the derivative of the input_weights relative to each layer
+        Perform the backpropagation for one observation and return the derivative of the weights relative to each layer
 
-        :param y: the class of the current observation represented in 1-of-k coding
+        :param batch: the batch used to train the network
+        :param eta: the learning rate
         """
         # store the derivatives of the input weights and biases of each layer, computed during batch processing
         der_weights = {layer: np.zeros(self.input_weights[layer].shape) for prev_layer, layer in self.layers}
