@@ -52,7 +52,7 @@ class FullyConnectedLayer(Layer):
         :param input_w: the weights connecting the previous layer with this one
         :param input_b: the biases of this layer
         """
-        self.z = np.dot(input_w, input_a) + input_b
+        self.z = input_w @ input_a + input_b
         self.a = self.act_func(self.z)
 
     def backpropagate(self, input_z, input_a, input_w, delta_zlp):
@@ -67,8 +67,8 @@ class FullyConnectedLayer(Layer):
             and the error propagated by this layer
         """
         # compute the derivatives of the weights and biases
-        d_der_w = np.dot(delta_zlp, input_a.T)
+        d_der_w = delta_zlp @ input_a.T
         d_der_b = delta_zlp
         # backpropagate the error for the previous layer
-        delta_zl = np.dot(input_w.T, delta_zlp) * self.der_act_func(input_z)
+        delta_zl = input_w.T @ delta_zlp * self.der_act_func(input_z)
         return d_der_w, delta_zlp, delta_zl
