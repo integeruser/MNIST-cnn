@@ -6,13 +6,11 @@ import functions
 
 
 class Layer(metaclass=abc.ABCMeta):
-    def __init__(self, width, height, depth):
-        self.width = width
-        self.height = height
+    def __init__(self, depth, height, width):
         self.depth = depth
-        self.num_neurons_out = width * height * depth
-        self.z = None
-        self.a = None
+        self.height = height
+        self.width = width
+        self.num_neurons_out = depth * height * width
 
     @abc.abstractmethod
     def feedforward(self, prev_layer, input_w, input_b):
@@ -26,8 +24,8 @@ class Layer(metaclass=abc.ABCMeta):
 ###############################################################################
 
 class InputLayer(Layer):
-    def __init__(self, width, height):
-        super().__init__(width, height, depth=1)
+    def __init__(self, height, width):
+        super().__init__(1, height, width)
 
     def feedforward(self, prev_layer, input_w, input_b):
         raise AssertionError
@@ -40,7 +38,7 @@ class InputLayer(Layer):
 
 class FullyConnectedLayer(Layer):
     def __init__(self, width, height, act_func):
-        super().__init__(width, height, depth=1)
+        super().__init__(1, height, width)
         self.act_func = act_func
         self.der_act_func = functions.get_derivative(act_func)
 
