@@ -52,8 +52,10 @@ class FullyConnectedLayer(Layer):
         :param input_w: the weights connecting the previous layer with this one
         :param input_b: the biases of this layer
         """
-        self.z = input_w @ prev_layer.a + input_b
+        input_a = prev_layer.a.reshape((prev_layer.a.size, 1))
+        self.z = (input_w @ input_a) + input_b
         self.a = self.act_func(self.z)
+        assert self.z.shape == self.a.shape
 
     def backpropagate(self, prev_layer, input_w, delta_zlp):
         """
@@ -61,13 +63,15 @@ class FullyConnectedLayer(Layer):
 
         :param prev_layer: the previous layer of the network
         :param input_w: the weights connecting the previous layer with this one
-        :param delta_zlp: the error propagated by the following layer
+        :param delta_zlp: the error propagated backward by the next layer of the network
         :returns: the amount of change of input weights of this layer, the amount of change of the biases of this layer
             and the error propagated by this layer
         """
+        input_a = prev_layer.a.reshape((prev_layer.a.size, 1))
         # compute the derivatives of the weights and biases
-        d_der_w = delta_zlp @ prev_layer.a.T
+        d_der_w = delta_zlp @ input_a.T
         d_der_b = delta_zlp
         # backpropagate the error for the previous layer
-        delta_zl = input_w.T @ delta_zlp * self.der_act_func(prev_layer.z)
-        return d_der_w, delta_zlp, delta_zl
+        assert prev_layer.z.shape == prev_layer.a.shape
+        delta_zl = (input_w.T @ delta_zlp).reshape(prev_layer.z.shape) * self.der_act_func(prev_layer.z)
+        return d_der_w, d_der_b, delta_zl

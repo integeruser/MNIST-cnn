@@ -37,7 +37,7 @@ class NeuralNetwork():
         :param x: the observation taken as input layer
         """
         # the input layer hasn't zetas and its initial values are considered directly as activations
-        self.input_layer.z = np.array([])
+        self.input_layer.z = np.zeros_like(x)
         self.input_layer.a = x
 
         # feedforward the input for each layer
