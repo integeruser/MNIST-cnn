@@ -1,6 +1,6 @@
 import numpy as np
 
-from layers import FullyConnectedLayer
+from layers import ConvolutionalLayer, FullyConnectedLayer, PollingLayer
 import functions
 
 
@@ -27,6 +27,17 @@ class NeuralNetwork():
                                                              size=(layer.num_neurons_out, prev_layer.num_neurons_out))
                 self.input_biases[layer] = np.random.normal(0, 1 / np.sqrt(prev_layer.num_neurons_out),
                                                             size=(layer.num_neurons_out, 1))
+            elif type(layer) is ConvolutionalLayer:
+                self.input_weights[layer] = np.random.normal(0, 1 / np.sqrt(prev_layer.num_neurons_out),
+                                                             size=(layer.depth, prev_layer.depth,
+                                                                   layer.kernel_size, layer.kernel_size))
+                self.input_biases[layer] = np.random.normal(0, 1 / np.sqrt(prev_layer.num_neurons_out),
+                                                            size=(layer.depth, 1))
+            elif type(layer) is PollingLayer:
+                if not isinstance(prev_layer, ConvolutionalLayer):
+                    raise NotImplementedError
+                self.input_weights[layer] = np.array([])
+                self.input_biases[layer] = np.array([])
             else:
                 raise NotImplementedError
 
