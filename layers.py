@@ -143,3 +143,36 @@ class PollingLayer(Layer):
                     assert window.shape == (self.window_size, self.window_size)
                     fmap[r][c] = self.poll_func(window)
         self.a = self.z
+
+    def backpropagate(self, prev_layer, input_w, delta_z):
+        """
+        Backpropagate the error through the layer. Given any pair source(convolutional)/destination(polling) feature
+        maps, each unit of the destination feature map propagates an error to a window (self.window_size, self.window_size)
+        of the source feature map
+
+        :param prev_layer: the previous layer of the network
+        :param input_w: the weights connecting the previous layer with this one. Since the previous layer is for sure
+            a convolutional layer, this tensor should be empty
+        :param delta_z: a tensor of shape (self.depth, self.height, self.width)
+        """
+        assert isinstance(prev_layer, ConvolutionalLayer)
+        assert prev_layer.depth == self.depth
+        assert input_w.size == 0
+        assert delta_z.shape == (self.depth, self.height, self.width)
+
+        der_input_w = np.array([])
+
+        der_input_b = np.array([])
+
+        delta_zl = np.kron(np.ones((self.window_size, self.window_size)), delta_z)
+        assert delta_zl.shape == (prev_layer.depth, prev_layer.height, prev_layer.width)
+        delta_zl = np.expand_dims(delta_zl, axis=1)  # todo forse questo expand dim è da togliere
+        for r, t in zip(range(self.depth), range(prev_layer.depth)):
+            for m in range(0, prev_layer.height, self.window_size):
+                for n in range(0, prev_layer.width, self.window_size):
+                    src_window = prev_layer.a[t, 0, m:m + self.window_size, n:n + self.window_size]
+                    dst_window =     delta_zl[r, 0, m:m + self.window_size, n:n + self.window_size]
+                    assert src_window.shape == dst_window.shape == (self.window_size, self.window_size)
+                    dst_window = np.multiply(dst_window, self.der_poll_func(src_window))
+
+        return der_input_w, der_input_b, delta_zl
