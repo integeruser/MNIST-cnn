@@ -102,6 +102,45 @@ class ConvolutionalLayer(Layer):
         self.a = np.vectorize(self.act_func)(self.z)
         assert self.z.shape == self.a.shape
 
+    def backpropagate(self, prev_layer, input_w, delta_z):
+        """
+        Backpropagate the error through the layer
+
+        :param prev_layer: the previous layer of the network. The activations of the previous layer are a list of
+            feature maps, where each feature map is a 2d matrix
+        :param input_w: the weights connecting the previous layer with this one (a list of tensors with shape
+            (depth, prev_layer.depth, kernel_size, kernel_size))
+        :param delta_z:
+        """
+        assert delta_z.shape[0] == self.depth
+
+        der_input_w = np.empty_like(input_w)
+        for r in range(self.depth):
+            for t in range(prev_layer.depth):
+                for h in range(self.kernel_size):
+                    for v in range(self.kernel_size):
+                        tmp = np.zeros_like(delta_z[r, t])
+                        tmp[v:self.height:self.stride_length, h:self.width:self.stride_length] = \
+                            prev_layer.a[t, v:self.height:self.stride_length, h:self.width:self.stride_length]
+                        der_input_w[r, t, h, v] = np.sum(np.multiply(tmp, delta_z[r, t]))
+
+        der_input_b = np.empty((self.depth, 1))
+        for r in range(self.depth):
+            der_input_b[r] = np.sum(delta_z[r])
+
+        delta_zl = np.empty_like(prev_layer.a)
+        for r in range(self.depth):
+            for t in range(prev_layer.depth):
+                kernel = input_w[r, t]
+                delta_zl[t] = np.zeros((prev_layer.height, prev_layer.width))
+                for i, m in enumerate(range(0, prev_layer.height, self.kernel_size)):
+                    for j, n in enumerate(range(0, prev_layer.width, self.kernel_size)):
+                        src_window = delta_zl[t, m:m + self.kernel_size, n:n + self.kernel_size]
+                        tmp = kernel * delta_z[r, t, i, j]
+                        src_window += tmp[:src_window.shape[0], :src_window.shape[1]]
+
+        return der_input_w, der_input_b, delta_zl
+
 
 class PollingLayer(Layer):
     def __init__(self, depth, height, width, window_size, poll_func):
