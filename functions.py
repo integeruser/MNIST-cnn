@@ -29,12 +29,12 @@ def der_sigmoid(x):
     return sigmoid(x) * (1 - sigmoid(x))
 
 
-def softmax(x, norm_const):
-    return np.exp(x) / norm_const
+def softmax(x):
+    return np.exp(x) / np.sum(np.exp(x))
 
 
 def der_softmax(x):
-    return softmax(x, sum(np.exp(x)) * (1 - softmax(x, sum(np.exp(x)))))
+    return softmax(x) * (1 - softmax(x))
 
 
 def rect_lin(x):
@@ -85,11 +85,11 @@ def der_max(x, *args):
     return res
 
 
-def mean(x, *args):
+def mean(x):
     return np.mean(x)
 
 
-def der_mean(x, *args):
+def der_mean(x):
     return np.ones(x.shape) / x.size
 
 
