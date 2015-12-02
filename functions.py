@@ -11,8 +11,7 @@ def get_derivative(func):
         cross_entropy: der_cross_entropy,
         log_likelihood: der_log_likelihood,
 
-        max: der_max,
-        mean: der_mean
+        max: der_max
     }
     assert func in derivatives
     return derivatives[func]
@@ -74,10 +73,3 @@ def der_max(x):
     der = np.zeros_like(x, dtype=np.uint8)
     der[np.unravel_index(x.argmax(), x.shape)] = 1
     return der
-
-
-def mean(x):
-    return np.mean(x)
-
-def der_mean(x):
-    return np.ones(x.shape) / x.size
