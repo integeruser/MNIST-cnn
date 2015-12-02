@@ -5,7 +5,6 @@ def get_derivative(func):
     derivatives = {
         sigmoid: der_sigmoid,
         softmax: der_softmax,
-        rect_lin: der_rect_lin,
 
         quadratic: der_quadratic,
         cross_entropy: der_cross_entropy,
@@ -31,14 +30,6 @@ def softmax(x):
 
 def der_softmax(x):
     return softmax(x) * (1 - softmax(x))
-
-
-def rect_lin(x):
-    return max(0, x)
-
-def der_rect_lin(x):
-    assert x != 0
-    return 1.0 if x > 0 else 0.0
 
 
 ### cost functions (computed on a single observation) #########################
