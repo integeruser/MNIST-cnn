@@ -22,14 +22,17 @@ def sigmoid(x):
     return 1.0 / (1.0 + np.exp(-x))
 
 def der_sigmoid(x):
-    return sigmoid(x) * (1 - sigmoid(x))
+    s = sigmoid(x)
+    return s * (1 - s)
 
 
 def softmax(x):
-    return np.exp(x) / np.sum(np.exp(x))
+    e = np.exp(x)
+    return e / np.sum(e)
 
 def der_softmax(x):
-    return softmax(x) * (1 - softmax(x))
+    s = softmax(x)
+    return s * (1 - s)
 
 
 ### cost functions (computed on a single observation) #########################
