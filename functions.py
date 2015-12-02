@@ -74,15 +74,14 @@ def der_log_likelihood(a, y):
 
 ### polling functions #########################################################
 
-def max(x, *args):
+def max(x):
     return np.max(x)
 
 
-# TODO: needs the elements of the previous layer
-def der_max(x, *args):
-    res = np.zeros(x.shape)
-    res[x.index(max(x))] = 1
-    return res
+def der_max(x):
+    der = np.zeros_like(x, dtype=np.uint8)
+    der[np.unravel_index(x.argmax(), x.shape)] = 1
+    return der
 
 
 def mean(x):
