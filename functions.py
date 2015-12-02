@@ -12,8 +12,7 @@ def get_derivative(func):
         log_likelihood: der_log_likelihood,
 
         max: der_max,
-        mean: der_mean,
-        lp_norm: der_lp_norm
+        mean: der_mean
     }
     assert func in derivatives
     return derivatives[func]
@@ -24,7 +23,6 @@ def get_derivative(func):
 def sigmoid(x):
     return 1.0 / (1.0 + np.exp(-x))
 
-
 def der_sigmoid(x):
     return sigmoid(x) * (1 - sigmoid(x))
 
@@ -32,14 +30,12 @@ def der_sigmoid(x):
 def softmax(x):
     return np.exp(x) / np.sum(np.exp(x))
 
-
 def der_softmax(x):
     return softmax(x) * (1 - softmax(x))
 
 
 def rect_lin(x):
     return max(0, x)
-
 
 def der_rect_lin(x):
     assert x != 0
@@ -51,7 +47,6 @@ def der_rect_lin(x):
 def quadratic(a, y):
     return 0.5 * sum((y - a) ** 2)
 
-
 def der_quadratic(a, y):
     return a - y
 
@@ -59,14 +54,12 @@ def der_quadratic(a, y):
 def cross_entropy(a, y):
     return sum(-y * np.log(a) + (1 - y) * np.log(1 - a))
 
-
 def der_cross_entropy(a, y):
     return (a - y) / (a - a ** 2)
 
 
 def log_likelihood(a, y):
     return -np.log(a[np.where(y == 1)])
-
 
 def der_log_likelihood(a, y):
     raise NotImplementedError
@@ -77,7 +70,6 @@ def der_log_likelihood(a, y):
 def max(x):
     return np.max(x)
 
-
 def der_max(x):
     der = np.zeros_like(x, dtype=np.uint8)
     der[np.unravel_index(x.argmax(), x.shape)] = 1
@@ -87,17 +79,5 @@ def der_max(x):
 def mean(x):
     return np.mean(x)
 
-
 def der_mean(x):
     return np.ones(x.shape) / x.size
-
-
-# TODO change p with args or something similar
-def lp_norm(x, *args):
-    return np.linalg.norm(x, args[0])
-
-
-# TODO needs the elements of the previous layer
-def der_lp_norm(x, *args):
-    # args stands for p
-    return x ** (args[0] - 1) * sum(sum(abs(x) ** args[0])) ** (1 / (args[0] - 1))
