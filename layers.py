@@ -1,10 +1,9 @@
 import abc
 
-import scipy as sp
 import scipy.signal
 import numpy as np
 
-import functions
+import functions as f
 
 
 class Layer(metaclass=abc.ABCMeta):
@@ -52,7 +51,7 @@ class FullyConnectedLayer(Layer):
     def __init__(self, width, height, act_func):
         super().__init__(1, height, width)
         self.act_func = act_func
-        self.der_act_func = functions.get_derivative(act_func)
+        self.der_act_func = f.get_derivative(act_func)
 
     def feedforward(self, prev_layer, input_w, input_b):
         """
@@ -93,7 +92,7 @@ class ConvolutionalLayer(Layer):
         self.kernel_size = kernel_size
         self.stride_length = 1
         self.act_func = act_func
-        self.der_act_func = functions.get_derivative(act_func)
+        self.der_act_func = f.get_derivative(act_func)
 
     def feedforward(self, prev_layer, input_w, input_b):
         """
@@ -108,7 +107,7 @@ class ConvolutionalLayer(Layer):
         assert prev_layer.a.ndim == 3
         assert input_w.shape == (self.depth, prev_layer.depth, self.kernel_size, self.kernel_size)
         assert input_b.shape == (self.depth, 1)
-        self.z = np.array([sp.signal.convolve(prev_layer.a, fmap, mode="valid") for fmap in input_w])
+        self.z = np.array([scipy.signal.convolve(prev_layer.a, fmap, mode="valid") for fmap in input_w])
         self.a = np.vectorize(self.act_func)(self.z)
         assert self.z.shape == self.a.shape
 
@@ -158,7 +157,7 @@ class PollingLayer(Layer):
         self.window_size = window_size
         self.stride_length = window_size
         self.poll_func = poll_func
-        self.der_poll_func = functions.get_derivative(poll_func)
+        self.der_poll_func = f.get_derivative(poll_func)
 
     def feedforward(self, prev_layer, input_w, input_b):
         """

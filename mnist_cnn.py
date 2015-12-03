@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 import sys
 
+import numpy as np
+
 import functions as f
 import layers as l
 import network as n
-import numpy as np
 import utils as u
 
 np.random.seed(314)
