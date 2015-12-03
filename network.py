@@ -1,7 +1,7 @@
 import numpy as np
 
-from layers import ConvolutionalLayer, FullyConnectedLayer, PollingLayer
-import functions
+import functions as f
+import layers as l
 import utils as u
 
 
@@ -18,24 +18,23 @@ class NeuralNetwork():
         self.output_layer = layers[-1]
         self.layers = [(prev_layer, layer) for prev_layer, layer in zip(layers[:-1], layers[1:])]
 
-        self.der_cost_func = functions.get_derivative(cost_func)
+        self.cost_func = cost_func
+        self.der_cost_func = f.get_derivative(cost_func)
 
         self.input_weights = {}
         self.input_biases = {}
         for prev_layer, layer in self.layers:
-            if type(layer) is FullyConnectedLayer:
-                self.input_weights[layer] = np.random.normal(0, 1 / np.sqrt(prev_layer.num_neurons_out),
-                                                             size=(layer.num_neurons_out, prev_layer.num_neurons_out))
-                self.input_biases[layer] = np.random.normal(0, 1 / np.sqrt(prev_layer.num_neurons_out),
-                                                            size=(layer.num_neurons_out, 1))
-            elif type(layer) is ConvolutionalLayer:
-                self.input_weights[layer] = np.random.normal(0, 1 / np.sqrt(prev_layer.num_neurons_out),
-                                                             size=(layer.depth, prev_layer.depth,
-                                                                   layer.kernel_size, layer.kernel_size))
-                self.input_biases[layer] = np.random.normal(0, 1 / np.sqrt(prev_layer.num_neurons_out),
-                                                            size=(layer.depth, 1))
-            elif type(layer) is PollingLayer:
-                if not isinstance(prev_layer, ConvolutionalLayer):
+            if type(layer) is l.FullyConnectedLayer:
+                self.input_weights[layer] = u.glorot_uniform((layer.num_neurons_out, prev_layer.num_neurons_out),
+                                                             prev_layer.num_neurons_out, layer.num_neurons_out)
+                self.input_biases[layer] = np.zeros((layer.num_neurons_out, 1))
+            elif type(layer) is l.ConvolutionalLayer:
+                self.input_weights[layer] = u.glorot_uniform(
+                    (layer.depth, prev_layer.depth, layer.kernel_size, layer.kernel_size),
+                    prev_layer.num_neurons_out, layer.num_neurons_out)
+                self.input_biases[layer] = np.zeros((layer.depth, 1))
+            elif type(layer) is l.PollingLayer:
+                if not isinstance(prev_layer, l.ConvolutionalLayer):
                     raise NotImplementedError
                 self.input_weights[layer] = np.array([])
                 self.input_biases[layer] = np.array([])
@@ -107,7 +106,6 @@ def train(net, inputs, num_epochs, batch_size, eta):
     :param eta: the learning rate
     """
     assert eta > 0
-    assert len(inputs) % batch_size == 0
 
     for i in range(num_epochs):
         np.random.shuffle(inputs)
@@ -117,7 +115,6 @@ def train(net, inputs, num_epochs, batch_size, eta):
         for j, batch in enumerate(batches):
             u.print("Epoch %d [%d/%d]" % (i+1, j+1, len(batches)), override=True)
             net.backpropagate(batch, eta)
-
 
 def test(net, tests):
     """
