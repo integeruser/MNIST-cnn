@@ -205,6 +205,7 @@ class PollingLayer(Layer):
         """
         assert isinstance(prev_layer, ConvolutionalLayer)
         assert prev_layer.depth == self.depth
+        assert prev_layer.a.ndim == 4
         assert input_w.size == 0
         assert delta_z.shape == (self.depth, self.height, self.width)
 
@@ -212,15 +213,17 @@ class PollingLayer(Layer):
 
         der_input_b = np.array([])
 
-        delta_zl = np.kron(np.ones((self.window_size, self.window_size)), delta_z)
-        assert delta_zl.shape == (prev_layer.depth, prev_layer.height, prev_layer.width)
-        delta_zl = np.expand_dims(delta_zl, axis=1)  # todo forse questo expand dim è da togliere
-        for r, t in zip(range(self.depth), range(prev_layer.depth)):
+        delta_zl = np.kron(delta_z, np.ones((self.window_size, self.window_size)))
+        delta_zl = np.expand_dims(delta_zl, axis=1)
+        assert delta_zl.shape == (prev_layer.depth, 1, prev_layer.height, prev_layer.width)
+        for t, r in zip(range(prev_layer.depth), range(self.depth)):
+            src = prev_layer.a[t, 0]
+            dst =     delta_zl[r, 0]
             for m in range(0, prev_layer.height, self.window_size):
                 for n in range(0, prev_layer.width, self.window_size):
-                    src_window = prev_layer.a[t, 0, m:m + self.window_size, n:n + self.window_size]
-                    dst_window =     delta_zl[r, 0, m:m + self.window_size, n:n + self.window_size]
+                    src_window = src[m:m+self.window_size, n:n+self.window_size]
+                    dst_window = dst[m:m+self.window_size, n:n+self.window_size]
                     assert src_window.shape == dst_window.shape == (self.window_size, self.window_size)
-                    dst_window = np.multiply(dst_window, self.der_poll_func(src_window))
+                    dst_window[:] *= self.der_poll_func(src_window)
 
         return der_input_w, der_input_b, delta_zl
