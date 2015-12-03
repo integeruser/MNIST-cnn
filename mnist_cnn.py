@@ -16,10 +16,10 @@ if len(sys.argv) != 2:
 
 mnist_npzpath = sys.argv[1]
 
-print("Loading '%s'..." % mnist_npzpath)
+u.print("Loading '%s'..." % mnist_npzpath, bcolor=u.bcolors.BOLD)
 trn_set, tst_set = u.load_mnist_npz(mnist_npzpath)
 
-print("Building CNN...")
+u.print("Building CNN...", bcolor=u.bcolors.BOLD)
 net = n.NeuralNetwork([
     l.InputLayer(height=28, width=28),
     l.ConvolutionalLayer(depth=2, height=24, width=24, kernel_size=5, act_func=f.sigmoid),
@@ -29,8 +29,8 @@ net = n.NeuralNetwork([
 ], f.quadratic)
 print(net)
 
-print("Training CNN...")
+u.print("Training CNN...", bcolor=u.bcolors.BOLD)
 n.train(net, trn_set, 1, 10, 0.1)
 
-print("Testing CNN...")
+u.print("Testing CNN...", bcolor=u.bcolors.BOLD)
 n.test(net, tst_set)

@@ -1,5 +1,6 @@
 import os
 import struct
+import sys
 
 import numpy as np
 
@@ -50,3 +51,33 @@ def load_mnist_npz(mnist_npzpath):
         (img / 255. for img in tst_imgs),
         (to_categorical(lbl) for lbl in tst_lbls))
     return np.array(list(trn_set)), np.array(list(tst_set))
+
+
+class bcolors:
+    HEADER =    "\033[95m"
+    OKBLUE =    "\033[94m"
+    OKGREEN =   "\033[92m"
+    WARNING =   "\033[93m"
+    FAIL =      "\033[91m"
+    ENDC =      "\033[0m"
+    BOLD =      "\033[1m"
+    UNDERLINE = "\033[4m"
+
+def print(s="", bcolor=None, override=False):
+    if print.last_override and not override:
+        sys.stdout.write("\n")
+    print.last_override = override
+
+    if override:
+        sys.stdout.write("\33[2K\r")
+    if bcolor:
+        sys.stdout.write(bcolor)
+    sys.stdout.write(str(s))
+    if bcolor:
+        sys.stdout.write(bcolors.ENDC)
+    if not override:
+        sys.stdout.write("\n")
+    sys.stdout.flush()
+
+
+print.last_override = False

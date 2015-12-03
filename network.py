@@ -2,6 +2,7 @@ import numpy as np
 
 from layers import ConvolutionalLayer, FullyConnectedLayer, PollingLayer
 import functions
+import utils as u
 
 
 class NeuralNetwork():
@@ -109,13 +110,12 @@ def train(net, inputs, num_epochs, batch_size, eta):
     assert len(inputs) % batch_size == 0
 
     for i in range(num_epochs):
-        print("Epoch {}".format(i + 1))
-
         np.random.shuffle(inputs)
 
         # divide input observations into batches of size batch_size
         batches = [inputs[j:j + batch_size] for j in range(0, len(inputs), batch_size)]
-        for batch in batches:
+        for j, batch in enumerate(batches):
+            u.print("Epoch %d [%d/%d]" % (i+1, j+1, len(batches)), override=True)
             net.backpropagate(batch, eta)
 
 
