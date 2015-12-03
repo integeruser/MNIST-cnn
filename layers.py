@@ -14,6 +14,16 @@ class Layer(metaclass=abc.ABCMeta):
         self.width = width
         self.num_neurons_out = depth * height * width
 
+    def __str__(self):
+        s = "%s(" % self.__class__.__name__
+        for name, value in sorted(vars(self).items()):
+            if hasattr(vars(self)[name], "__call__"):
+                s += "%s: %s, " % (name, value.__name__)
+            else:
+                s += "%s: %s, " % (name, value)
+        s = s[:-2] + ")"
+        return s
+
     @abc.abstractmethod
     def feedforward(self, prev_layer, input_w, input_b):
         raise AssertionError

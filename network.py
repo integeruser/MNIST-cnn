@@ -41,6 +41,14 @@ class NeuralNetwork():
             else:
                 raise NotImplementedError
 
+    def __str__(self):
+        s = "NeuralNetwork([\n"
+        for prev_layer, layer in self.layers:
+            s += "    %s,\n" % prev_layer
+        s += "    %s\n" % self.output_layer
+        s += "], cost_func=%s)" % self.cost_func.__name__
+        return s
+
     def feedforward(self, x):
         """
         Perform the feedforward of one observation and return the list of z and activations of each layer

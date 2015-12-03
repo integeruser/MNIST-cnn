@@ -24,6 +24,7 @@ net = n.NeuralNetwork([
     l.FullyConnectedLayer(height=100, width=1, act_func=f.sigmoid),
     l.FullyConnectedLayer(height=10, width=1, act_func=f.sigmoid)
 ], f.quadratic)
+print(net)
 
 print("Training NN...")
 n.train(net, trn_set, 1, 10, 3.0)
