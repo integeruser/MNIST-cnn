@@ -180,19 +180,18 @@ class PollingLayer(Layer):
         prev_layer_fmap_size = prev_layer.height
         assert prev_layer_fmap_size % self.window_size == 0
 
-        # create self.depth empty fmaps
-        self.z = np.empty((self.depth, self.height, self.width))
-        # for each feature map
-        for prev_layer_fmap, fmap in zip(prev_layer.a, self.z):
-            _, num_rows, num_cols = prev_layer_fmap.shape
-            assert num_rows % self.window_size == 0
-            assert num_cols % self.window_size == 0
-            # populate fmap by computing polling functions by sliding window on the feature map of the previous layer
-            for r, prev_r in enumerate(range(0, num_rows, self.window_size)):
-                for c, prev_c in enumerate(range(0, num_cols, self.window_size)):
-                    window = prev_layer_fmap[0, prev_r:prev_r + self.window_size, prev_c:prev_c + self.window_size]
-                    assert window.shape == (self.window_size, self.window_size)
-                    fmap[r][c] = self.poll_func(window)
+        self.z = np.zeros((self.depth, self.height, self.width))
+        for t, r in zip(range(prev_layer.depth), range(self.depth)):
+            src = prev_layer.a[t, 0]
+            dst =       self.z[r]
+            for m in range(0, prev_layer.height, self.window_size):
+                for n in range(0, prev_layer.width, self.window_size):
+                    src_window = src[m:m+self.window_size, n:n+self.window_size]
+                    assert src_window.shape == (self.window_size, self.window_size)
+                    i = m // self.window_size
+                    j = n // self.window_size
+                    dst[i, j] = self.poll_func(src_window)
+
         self.a = self.z
 
     def backpropagate(self, prev_layer, input_w, delta_z):
