@@ -127,29 +127,34 @@ class ConvolutionalLayer(Layer):
         assert delta_z.shape[0] == self.depth
 
         der_input_w = np.empty_like(input_w)
-        for r in range(self.depth):
-            for t in range(prev_layer.depth):
+        for t in range(prev_layer.depth):
+            for r in range(self.depth):
+                src = prev_layer.a[t]
+                err =      delta_z[r, t]
+                dst =  der_input_w[r, t]
                 for h in range(self.kernel_size):
                     for v in range(self.kernel_size):
-                        tmp = np.zeros_like(delta_z[r, t])
-                        tmp[v:self.height:self.stride_length, h:self.width:self.stride_length] = \
-                            prev_layer.a[t, v:self.height:self.stride_length, h:self.width:self.stride_length]
-                        der_input_w[r, t, h, v] = np.sum(np.multiply(tmp, delta_z[r, t]))
+                        src_window = src[v:self.height:self.stride_length, h:self.width:self.stride_length]
+                        err_window = err[v:self.height:self.stride_length, h:self.width:self.stride_length]
+                        dst[h, v] = np.sum(src_window * err_window)
 
         der_input_b = np.empty((self.depth, 1))
         for r in range(self.depth):
             der_input_b[r] = np.sum(delta_z[r])
 
-        delta_zl = np.empty_like(prev_layer.a)
-        for r in range(self.depth):
-            for t in range(prev_layer.depth):
+        delta_zl = np.zeros_like(prev_layer.a)
+        for t in range(prev_layer.depth):
+            for r in range(self.depth):
+                src =    delta_z[r, t]
                 kernel = input_w[r, t]
-                delta_zl[t] = np.zeros((prev_layer.height, prev_layer.width))
-                for i, m in enumerate(range(0, prev_layer.height, self.kernel_size)):
-                    for j, n in enumerate(range(0, prev_layer.width, self.kernel_size)):
-                        src_window = delta_zl[t, m:m + self.kernel_size, n:n + self.kernel_size]
-                        tmp = kernel * delta_z[r, t, i, j]
-                        src_window += tmp[:src_window.shape[0], :src_window.shape[1]]
+                dst =    delta_zl[t]
+                for m in range(0, prev_layer.height, self.kernel_size):
+                    for n in range(0, prev_layer.width, self.kernel_size):
+                        dst_window = dst[m:m+self.kernel_size, n:n+self.kernel_size]
+                        i = m // self.kernel_size
+                        j = n // self.kernel_size
+                        rows, cols = dst_window.shape
+                        dst_window += kernel[:rows, :cols] * src[i, j]
 
         return der_input_w, der_input_b, delta_zl
 
