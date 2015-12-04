@@ -73,13 +73,15 @@ class FullyConnectedLayer(Layer):
         :returns: the amount of change of input weights of this layer, the amount of change of the biases of this layer
             and the error propagated by this layer
         """
+        assert delta_z.shape == self.z.shape == self.a.shape
+
         input_a = prev_layer.a.reshape((prev_layer.a.size, 1))
-        # compute the derivatives of the weights and biases
         der_input_w = delta_z @ input_a.T
-        der_input_b = delta_z
-        # backpropagate the error for the previous layer
-        assert prev_layer.z.shape == prev_layer.a.shape
+
+        der_input_b = np.copy(delta_z)
+
         delta_zl = (input_w.T @ delta_z).reshape(prev_layer.z.shape) * self.der_act_func(prev_layer.z)
+
         return der_input_w, der_input_b, delta_zl
 
 
