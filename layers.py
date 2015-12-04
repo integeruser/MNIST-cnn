@@ -44,8 +44,8 @@ class InputLayer(Layer):
 
 
 class FullyConnectedLayer(Layer):
-    def __init__(self, width, height, act_func):
-        super().__init__(1, height, width)
+    def __init__(self, height, act_func):
+        super().__init__(1, height, 1)
         self.act_func = act_func
         self.der_act_func = f.get_derivative(act_func)
 

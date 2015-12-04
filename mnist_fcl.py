@@ -22,8 +22,8 @@ trn_set, tst_set = u.load_mnist_npz(mnist_npzpath)
 u.print("Building NN...", bcolor=u.bcolors.BOLD)
 net = n.NeuralNetwork([
     l.InputLayer(height=28, width=28),
-    l.FullyConnectedLayer(height=100, width=1, act_func=f.sigmoid),
-    l.FullyConnectedLayer(height=10, width=1, act_func=f.sigmoid)
+    l.FullyConnectedLayer(height=100, act_func=f.sigmoid),
+    l.FullyConnectedLayer(height=10, act_func=f.sigmoid)
 ], f.quadratic)
 u.print(net)
 
