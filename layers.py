@@ -32,8 +32,6 @@ class Layer(metaclass=abc.ABCMeta):
         raise AssertionError
 
 
-###############################################################################
-
 class InputLayer(Layer):
     def __init__(self, height, width):
         super().__init__(1, height, width)
@@ -44,8 +42,6 @@ class InputLayer(Layer):
     def backpropagate(self, prev_layer, input_w, delta_z):
         raise AssertionError
 
-
-###############################################################################
 
 class FullyConnectedLayer(Layer):
     def __init__(self, width, height, act_func):
@@ -63,6 +59,7 @@ class FullyConnectedLayer(Layer):
         """
         input_a = prev_layer.a.reshape((prev_layer.a.size, 1))
         self.z = (input_w @ input_a) + input_b
+
         self.a = self.act_func(self.z)
         assert self.z.shape == self.a.shape
 
