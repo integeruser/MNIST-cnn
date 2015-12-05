@@ -6,7 +6,7 @@ import utils as u
 
 
 class NeuralNetwork():
-    def __init__(self, layers, cost_func):
+    def __init__(self, layers, loss_func):
         """
         Initialize the data. Initial weights and biases are chosen randomly from a gaussian distribution
 
@@ -18,8 +18,7 @@ class NeuralNetwork():
         self.output_layer = layers[-1]
         self.layers = [(prev_layer, layer) for prev_layer, layer in zip(layers[:-1], layers[1:])]
 
-        self.cost_func = cost_func
-        self.der_cost_func = f.get_derivative(cost_func)
+        self.loss_func = loss_func
 
         self.input_weights = {}
         self.input_biases = {}
@@ -50,7 +49,7 @@ class NeuralNetwork():
         for prev_layer, layer in self.layers:
             s += "    %s,\n" % prev_layer
         s += "    %s\n" % self.output_layer
-        s += "], cost_func=%s)" % self.cost_func.__name__
+        s += "], loss_func=%s)" % self.loss_func.__name__
         return s
 
     def feedforward(self, x):
@@ -86,8 +85,7 @@ class NeuralNetwork():
             self.feedforward(x)
 
             # backpropagate the error
-            delta_z = self.der_cost_func(self.output_layer.a, y) * self.output_layer.der_act_func(self.output_layer.z, y)
-            # delta_z = self.output_layer.a - y
+            delta_z = self.loss_func(self.output_layer.a, y) * self.output_layer.der_act_func(self.output_layer.z, y)
             for prev_layer, layer in reversed(self.layers):
                 w = self.input_weights[layer]
                 der_w, der_b, delta_z = layer.backpropagate(prev_layer, w, delta_z)
