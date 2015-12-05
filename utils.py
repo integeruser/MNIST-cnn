@@ -84,5 +84,4 @@ def print(s="", bcolor=None, override=False):
         sys.stdout.write("\n")
     sys.stdout.flush()
 
-
 print.last_override = False

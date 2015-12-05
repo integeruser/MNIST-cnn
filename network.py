@@ -118,7 +118,7 @@ def train(net, inputs, num_epochs, batch_size, eta):
         # divide input observations into batches of size batch_size
         batches = [inputs[j:j + batch_size] for j in range(0, len(inputs), batch_size)]
         for j, batch in enumerate(batches):
-            u.print("Epoch %d [%d/%d]" % (i+1, j+1, len(batches)), override=True)
+            if (j+1) % 100 == 0: u.print("Epoch %d [%-10s] [%d/%d]" % (i+1, "=" * int(10 * (j+1)/len(batches)), j+1, len(batches)), override=True)
             net.backpropagate(batch, eta)
 
 def test(net, tests):
