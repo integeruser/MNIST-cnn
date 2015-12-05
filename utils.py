@@ -83,3 +83,8 @@ def print(s="", bcolor=None, override=False):
     sys.stdout.flush()
 
 print.last_override = False
+
+def print_progress(s="", bcolor=None, now=0, end=100):
+    if not s: s = "{bar}"
+    bar = "[%-10s]" % ("=" * int(10*now/end))
+    print(s.format(bar=bar), bcolor, override=True)
