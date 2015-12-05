@@ -42,8 +42,8 @@ class NeuralNetwork():
                 b_shape = (0)
             else:
                 raise NotImplementedError
-            self.input_weights[layer] = u.glorot_uniform(w_shape, layer_num_neurons_in, layer_num_neurons_out)
-            self.input_biases[layer]  = np.zeros(b_shape)
+            self.input_weights[layer] = u.glorot_uniform(w_shape, layer_num_neurons_in, layer_num_neurons_out).astype(np.float32)
+            self.input_biases[layer]  = np.zeros(b_shape).astype(np.float32)
 
     def __str__(self):
         s = "NeuralNetwork([\n"
@@ -100,7 +100,7 @@ class NeuralNetwork():
             self.input_biases[layer] -= eta / len(batch) * batch_der_biases[layer]
 
 
-def train(net, inputs, num_epochs, batch_size, eta):
+def train(net, trn_set, num_epochs, batch_size, eta):
     """
     Train the network according to the Stochastic Gradient Descent (SGD) algorithm
 
@@ -112,6 +112,9 @@ def train(net, inputs, num_epochs, batch_size, eta):
     """
     assert eta > 0
 
+    trn_x, trn_y = trn_set
+    inputs = [(x, y) for x, y in zip(trn_x, trn_y)]
+
     for i in range(num_epochs):
         np.random.shuffle(inputs)
 
@@ -121,12 +124,15 @@ def train(net, inputs, num_epochs, batch_size, eta):
             if (j+1) % 100 == 0: u.print("Epoch %d [%-10s] [%d/%d]" % (i+1, "=" * int(10 * (j+1)/len(batches)), j+1, len(batches)), override=True)
             net.backpropagate(batch, eta)
 
-def test(net, tests):
+def test(net, tst_set):
     """
     Test the network and return some performances index. Note that the classes must start from 0
 
     :param tests: the observations that are going to be used to test the performances of the network
     """
+    tst_x, tst_y = tst_set
+    tests = [(x, y) for x, y in zip(tst_x, tst_y)]
+
     perf = 0
     for x, y in tests:
         net.feedforward(x)

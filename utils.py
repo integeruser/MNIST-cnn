@@ -35,22 +35,20 @@ def load_mnist_npz(mnist_npzpath):
             y[lbl] = 1
             labels_to_categorical[lbl] = y
         return labels_to_categorical[lbl]
-
-    dataset = np.load(mnist_npzpath)
-    trn_imgs = dataset["trn_imgs"]
-    trn_lbls = dataset["trn_lbls"]
-    tst_imgs = dataset["tst_imgs"]
-    tst_lbls = dataset["tst_lbls"]
-
     labels_to_categorical = dict()
 
-    trn_set = zip(
-        (img / 255. for img in trn_imgs),
-        (to_categorical(lbl) for lbl in trn_lbls))
-    tst_set = zip(
-        (img / 255. for img in tst_imgs),
-        (to_categorical(lbl) for lbl in tst_lbls))
-    return np.array(list(trn_set)), np.array(list(tst_set))
+    dataset = np.load(mnist_npzpath)
+
+    trn_imgs = dataset["trn_imgs"]
+    trn_lbls = dataset["trn_lbls"]
+    trn_x = np.array([img/255. for img in trn_imgs]).astype(np.float32)
+    trn_y = np.array([to_categorical(lbl) for lbl in trn_lbls]).astype(np.uint8)
+
+    tst_imgs = dataset["tst_imgs"]
+    tst_lbls = dataset["tst_lbls"]
+    tst_x = np.array([img/255. for img in tst_imgs]).astype(np.float32)
+    tst_y = np.array([to_categorical(lbl) for lbl in tst_lbls]).astype(np.uint8)
+    return (trn_x, trn_y), (tst_x, tst_y)
 
 
 def glorot_uniform(size, num_neurons_in, num_neurons_out):
