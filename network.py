@@ -27,22 +27,23 @@ class NeuralNetwork():
             layer.connect_to(prev_layer)
 
             prev_layer_num_neurons_out = prev_layer.depth * prev_layer.height * prev_layer.width
+            layer_num_neurons_in       = prev_layer_num_neurons_out
             layer_num_neurons_out      = layer.depth      * layer.height      * layer.width
             if type(layer) is l.FullyConnectedLayer:
-                self.input_weights[layer] = u.glorot_uniform((layer_num_neurons_out, prev_layer_num_neurons_out),
-                                                             prev_layer_num_neurons_out, layer_num_neurons_out)
-                self.input_biases[layer] =  np.zeros((layer_num_neurons_out, 1))
+                w_shape = (layer_num_neurons_out, prev_layer_num_neurons_out)
+                b_shape = (layer_num_neurons_out, 1)
             elif type(layer) is l.ConvolutionalLayer:
-                self.input_weights[layer] = u.glorot_uniform((layer.depth, prev_layer.depth, layer.kernel_size, layer.kernel_size),
-                                                             prev_layer_num_neurons_out, layer_num_neurons_out)
-                self.input_biases[layer] =  np.zeros((layer.depth, 1))
+                w_shape = (layer.depth, prev_layer.depth, layer.kernel_size, layer.kernel_size)
+                b_shape = (layer.depth, 1)
             elif type(layer) is l.PollingLayer:
                 if not isinstance(prev_layer, l.ConvolutionalLayer):
                     raise NotImplementedError
-                self.input_weights[layer] = np.array([])
-                self.input_biases[layer] =  np.array([])
+                w_shape = (0)
+                b_shape = (0)
             else:
                 raise NotImplementedError
+            self.input_weights[layer] = u.glorot_uniform(w_shape, layer_num_neurons_in, layer_num_neurons_out)
+            self.input_biases[layer]  = np.zeros(b_shape)
 
     def __str__(self):
         s = "NeuralNetwork([\n"
@@ -64,9 +65,9 @@ class NeuralNetwork():
 
         # feedforward the input for each layer
         for prev_layer, layer in self.layers:
-            input_w = self.input_weights[layer]
-            input_b = self.input_biases[layer]
-            layer.feedforward(prev_layer, input_w, input_b)
+            w = self.input_weights[layer]
+            b = self.input_biases[layer]
+            layer.feedforward(prev_layer, w, b)
 
     def backpropagate(self, batch, eta):
         """
@@ -85,12 +86,13 @@ class NeuralNetwork():
             self.feedforward(x)
 
             # backpropagate the error
-            delta_z = self.der_cost_func(self.output_layer.a, y) * self.output_layer.der_act_func(self.output_layer.z)
+            delta_z = self.der_cost_func(self.output_layer.a, y) * self.output_layer.der_act_func(self.output_layer.z, y)
+            # delta_z = self.output_layer.a - y
             for prev_layer, layer in reversed(self.layers):
-                input_w = self.input_weights[layer]
-                der_input_w, der_input_b, delta_z = layer.backpropagate(prev_layer, input_w, delta_z)
-                batch_der_weights[layer] += der_input_w
-                batch_der_biases[layer] += der_input_b
+                w = self.input_weights[layer]
+                der_w, der_b, delta_z = layer.backpropagate(prev_layer, w, delta_z)
+                batch_der_weights[layer] += der_w
+                batch_der_biases[layer] += der_b
 
         # update weights and biases with the results of the current batch
         for prev_layer, layer in self.layers:

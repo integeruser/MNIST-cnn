@@ -27,11 +27,11 @@ class Layer(metaclass=abc.ABCMeta):
         raise AssertionError
 
     @abc.abstractmethod
-    def feedforward(self, prev_layer, input_w, input_b):
+    def feedforward(self, prev_layer, w, b):
         raise AssertionError
 
     @abc.abstractmethod
-    def backpropagate(self, prev_layer, input_w, delta_z):
+    def backpropagate(self, prev_layer, w, delta_z):
         raise AssertionError
 
 
@@ -45,10 +45,10 @@ class InputLayer(Layer):
     def connect_to(self, prev_layer):
         raise AssertionError
 
-    def feedforward(self, prev_layer, input_w, input_b):
+    def feedforward(self, prev_layer, w, b):
         raise AssertionError
 
-    def backpropagate(self, prev_layer, input_w, delta_z):
+    def backpropagate(self, prev_layer, w, delta_z):
         raise AssertionError
 
 
@@ -65,26 +65,26 @@ class FullyConnectedLayer(Layer):
     def connect_to(self, prev_layer):
         pass
 
-    def feedforward(self, prev_layer, input_w, input_b):
+    def feedforward(self, prev_layer, w, b):
         """
         Feedforward the observation through the layer
 
         :param prev_layer: the previous layer of the network
-        :param input_w: the weights connecting the previous layer with this one
-        :param input_b: the biases of this layer
+        :param w: the weights connecting the previous layer with this one
+        :param b: the biases of this layer
         """
         input_a = prev_layer.a.reshape((prev_layer.a.size, 1))
-        self.z = (input_w @ input_a) + input_b
+        self.z = (w @ input_a) + b
 
         self.a = self.act_func(self.z)
         assert self.z.shape == self.a.shape
 
-    def backpropagate(self, prev_layer, input_w, delta_z):
+    def backpropagate(self, prev_layer, w, delta_z):
         """
         Backpropagate the error through the layer
 
         :param prev_layer: the previous layer of the network
-        :param input_w: the weights connecting the previous layer with this one
+        :param w: the weights connecting the previous layer with this one
         :param delta_z: the error propagated backward by the next layer of the network
         :returns: the amount of change of input weights of this layer, the amount of change of the biases of this layer
             and the error propagated by this layer
@@ -92,13 +92,13 @@ class FullyConnectedLayer(Layer):
         assert delta_z.shape == self.z.shape == self.a.shape
 
         input_a = prev_layer.a.reshape((prev_layer.a.size, 1))
-        der_input_w = delta_z @ input_a.T
+        der_w = delta_z @ input_a.T
 
-        der_input_b = np.copy(delta_z)
+        der_b = np.copy(delta_z)
 
-        delta_zl = (input_w.T @ delta_z).reshape(prev_layer.z.shape) * self.der_act_func(prev_layer.z)
+        delta_zl = (w.T @ delta_z).reshape(prev_layer.z.shape) * self.der_act_func(prev_layer.z)
 
-        return der_input_w, der_input_b, delta_zl
+        return der_w, der_b, delta_zl
 
 
 class ConvolutionalLayer(Layer):
@@ -115,59 +115,59 @@ class ConvolutionalLayer(Layer):
         self.height = (prev_layer.height-self.kernel_size) // self.stride_length + 1
         self.width  = (prev_layer.width -self.kernel_size) // self.stride_length + 1
 
-    def feedforward(self, prev_layer, input_w, input_b):
+    def feedforward(self, prev_layer, w, b):
         """
         Feedforward the observation through the layer
 
         :param prev_layer: the previous layer of the network. The activations of the previous layer must be a list of
             feature maps, where each feature map is a 2d matrix
-        :param input_w: the weights connecting the previous layer with this one (must be a list of 3d tensors with shape
+        :param w: the weights connecting the previous layer with this one (must be a list of 3d tensors with shape
             (depth, prev_layer.depth, kernel_size, kernel_size))
-        :param input_b: the biases of this layer (must be a list of scalars with shape (depth, 1))
+        :param b: the biases of this layer (must be a list of scalars with shape (depth, 1))
         """
         assert prev_layer.a.ndim == 3
-        assert input_w.shape == (self.depth, prev_layer.depth, self.kernel_size, self.kernel_size)
-        assert input_b.shape == (self.depth, 1)
-        self.z = np.array([scipy.signal.convolve(prev_layer.a, fmap, mode="valid") for fmap in input_w])
+        assert w.shape == (self.depth, prev_layer.depth, self.kernel_size, self.kernel_size)
+        assert b.shape == (self.depth, 1)
+        self.z = np.array([scipy.signal.convolve(prev_layer.a, fmap, mode="valid") for fmap in w])
         for r in range(self.depth):
-            self.z[r] += input_b[r]
+            self.z[r] += b[r]
 
         self.a = np.vectorize(self.act_func)(self.z)
         assert self.z.shape == self.a.shape
 
-    def backpropagate(self, prev_layer, input_w, delta_z):
+    def backpropagate(self, prev_layer, w, delta_z):
         """
         Backpropagate the error through the layer
 
         :param prev_layer: the previous layer of the network. The activations of the previous layer are a list of
             feature maps, where each feature map is a 2d matrix
-        :param input_w: the weights connecting the previous layer with this one (a list of tensors with shape
+        :param w: the weights connecting the previous layer with this one (a list of tensors with shape
             (depth, prev_layer.depth, kernel_size, kernel_size))
         :param delta_z:
         """
         assert delta_z.shape[0] == self.depth
 
-        der_input_w = np.empty_like(input_w)
+        der_w = np.empty_like(w)
         for t in range(prev_layer.depth):
             for r in range(self.depth):
                 src = prev_layer.a[t]
                 err =      delta_z[r, t]
-                dst =  der_input_w[r, t]
+                dst =  der_w[r, t]
                 for h in range(self.kernel_size):
                     for v in range(self.kernel_size):
                         src_window = src[v:self.height:self.stride_length, h:self.width:self.stride_length]
                         err_window = err[v:self.height:self.stride_length, h:self.width:self.stride_length]
                         dst[h, v] = np.sum(src_window * err_window)
 
-        der_input_b = np.empty((self.depth, 1))
+        der_b = np.empty((self.depth, 1))
         for r in range(self.depth):
-            der_input_b[r] = np.sum(delta_z[r])
+            der_b[r] = np.sum(delta_z[r])
 
         delta_zl = np.zeros_like(prev_layer.a)
         for t in range(prev_layer.depth):
             for r in range(self.depth):
                 src =    delta_z[r, t]
-                kernel = input_w[r, t]
+                kernel = w[r, t]
                 dst =    delta_zl[t]
                 for m in range(0, prev_layer.height, self.kernel_size):
                     for n in range(0, prev_layer.width, self.kernel_size):
@@ -177,7 +177,7 @@ class ConvolutionalLayer(Layer):
                         rows, cols = dst_window.shape
                         dst_window += kernel[:rows, :cols] * src[i, j]
 
-        return der_input_w, der_input_b, delta_zl
+        return der_w, der_b, delta_zl
 
 
 class PollingLayer(Layer):
@@ -196,20 +196,20 @@ class PollingLayer(Layer):
         self.width  = (prev_layer.width -self.window_size) // self.stride_length + 1
 
 
-    def feedforward(self, prev_layer, input_w, input_b):
+    def feedforward(self, prev_layer, w, b):
         """
         Feedforward the observation through the layer
 
         :param prev_layer: the previous layer of the network. The activations of the previous layer must be a list of
             feature maps, where each feature map is a 3d matrix
-        :param input_w: should be an empty array (no weights between a convolutional layer and a polling layer)
-        :param input_b: should be an empty array (no biases in a polling layer)
+        :param w: should be an empty array (no weights between a convolutional layer and a polling layer)
+        :param b: should be an empty array (no biases in a polling layer)
         """
         assert isinstance(prev_layer, ConvolutionalLayer)
         assert prev_layer.depth == self.depth
         assert prev_layer.a.ndim == 4
-        assert input_w.size == 0
-        assert input_b.size == 0
+        assert w.size == 0
+        assert b.size == 0
 
         prev_layer_fmap_size = prev_layer.height
         assert prev_layer_fmap_size % self.window_size == 0
@@ -228,26 +228,26 @@ class PollingLayer(Layer):
 
         self.a = self.z
 
-    def backpropagate(self, prev_layer, input_w, delta_z):
+    def backpropagate(self, prev_layer, w, delta_z):
         """
         Backpropagate the error through the layer. Given any pair source(convolutional)/destination(polling) feature
         maps, each unit of the destination feature map propagates an error to a window (self.window_size, self.window_size)
         of the source feature map
 
         :param prev_layer: the previous layer of the network
-        :param input_w: the weights connecting the previous layer with this one. Since the previous layer is for sure
+        :param w: the weights connecting the previous layer with this one. Since the previous layer is for sure
             a convolutional layer, this tensor should be empty
         :param delta_z: a tensor of shape (self.depth, self.height, self.width)
         """
         assert isinstance(prev_layer, ConvolutionalLayer)
         assert prev_layer.depth == self.depth
         assert prev_layer.a.ndim == 4
-        assert input_w.size == 0
+        assert w.size == 0
         assert delta_z.shape == (self.depth, self.height, self.width)
 
-        der_input_w = np.array([])
+        der_w = np.array([])
 
-        der_input_b = np.array([])
+        der_b = np.array([])
 
         delta_zl = np.kron(delta_z, np.ones((self.window_size, self.window_size)))
         delta_zl = np.expand_dims(delta_zl, axis=1)
@@ -262,4 +262,4 @@ class PollingLayer(Layer):
                     assert src_window.shape == dst_window.shape == (self.window_size, self.window_size)
                     dst_window[:] *= self.der_poll_func(src_window)
 
-        return der_input_w, der_input_b, delta_zl
+        return der_w, der_b, delta_zl
