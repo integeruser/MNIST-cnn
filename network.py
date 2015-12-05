@@ -119,8 +119,8 @@ def train(net, trn_set, num_epochs, batch_size, eta):
         # divide input observations into batches of size batch_size
         batches = [inputs[j:j + batch_size] for j in range(0, len(inputs), batch_size)]
         for j, batch in enumerate(batches):
-            if (j+1) % 100 == 0: u.print_progress("Epoch %d {bar} [%d/%d]" % (i+1, j+1, len(batches)), now=j+1, end=len(batches))
             net.backpropagate(batch, eta)
+            u.print_progress("Epoch %d {bar} [%d/%d]" % (i+1, j+1, len(batches)), now=j+1, end=len(batches))
 
 def test(net, tst_set):
     """
