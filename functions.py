@@ -17,7 +17,7 @@ def get_derivative(func):
 def sigmoid(x):
     return 1.0 / (1.0 + np.exp(-x))
 
-def der_sigmoid(x):
+def der_sigmoid(x, y=None):
     s = sigmoid(x)
     return s * (1 - s)
 
@@ -26,10 +26,14 @@ def softmax(x):
     e = np.exp(x)
     return e / np.sum(e)
 
-def der_softmax(x):
+def der_softmax(x, y=None):
     s = softmax(x)
+    if y is not None:
+        k = s[np.where(y == 1)]
+        a = - k * s
+        a[np.where(y == 1)] = k * (1 - k)
+        return a
     return s * (1 - s)
-
 
 
 ### loss functions (computed on a single observation) #########################
