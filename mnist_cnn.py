@@ -22,10 +22,10 @@ trn_set, tst_set = u.load_mnist_npz(mnist_npzpath)
 u.print("Building CNN...", bcolor=u.bcolors.BOLD)
 net = n.NeuralNetwork([
     l.InputLayer(height=28, width=28),
-    l.ConvolutionalLayer(depth=2, height=24, width=24, kernel_size=5, act_func=f.sigmoid),
-    l.PollingLayer(depth=2, height=12, width=12, window_size=2, poll_func=f.max),
-    l.FullyConnectedLayer(height=100, width=1, act_func=f.sigmoid),
-    l.FullyConnectedLayer(height=10, width=1, act_func=f.sigmoid)
+    l.ConvolutionalLayer(depth=2, kernel_size=5, act_func=f.sigmoid),
+    l.PollingLayer(window_size=2, poll_func=f.max),
+    l.FullyConnectedLayer(height=100, act_func=f.sigmoid),
+    l.FullyConnectedLayer(height=10, act_func=f.sigmoid)
 ], f.quadratic)
 print(net)
 

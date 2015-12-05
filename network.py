@@ -24,13 +24,17 @@ class NeuralNetwork():
         self.input_weights = {}
         self.input_biases = {}
         for prev_layer, layer in self.layers:
+            layer.connect_to(prev_layer)
+
+            prev_layer_num_neurons_out = prev_layer.depth * prev_layer.height * prev_layer.width
+            layer_num_neurons_out      = layer.depth      * layer.height      * layer.width
             if type(layer) is l.FullyConnectedLayer:
-                self.input_weights[layer] = u.glorot_uniform((layer.num_neurons_out, prev_layer.num_neurons_out),
-                                                             prev_layer.num_neurons_out, layer.num_neurons_out)
-                self.input_biases[layer] =  np.zeros((layer.num_neurons_out, 1))
+                self.input_weights[layer] = u.glorot_uniform((layer_num_neurons_out, prev_layer_num_neurons_out),
+                                                             prev_layer_num_neurons_out, layer_num_neurons_out)
+                self.input_biases[layer] =  np.zeros((layer_num_neurons_out, 1))
             elif type(layer) is l.ConvolutionalLayer:
                 self.input_weights[layer] = u.glorot_uniform((layer.depth, prev_layer.depth, layer.kernel_size, layer.kernel_size),
-                                                             prev_layer.num_neurons_out, layer.num_neurons_out)
+                                                             prev_layer_num_neurons_out, layer_num_neurons_out)
                 self.input_biases[layer] =  np.zeros((layer.depth, 1))
             elif type(layer) is l.PollingLayer:
                 if not isinstance(prev_layer, l.ConvolutionalLayer):

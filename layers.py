@@ -7,11 +7,10 @@ import functions as f
 
 
 class Layer(metaclass=abc.ABCMeta):
-    def __init__(self, depth, height, width):
-        self.depth = depth
-        self.height = height
-        self.width = width
-        self.num_neurons_out = depth * height * width
+    def __init__(self):
+        self.depth  = None
+        self.height = None
+        self.width  = None
 
     def __str__(self):
         s = "%s(" % self.__class__.__name__
@@ -24,6 +23,10 @@ class Layer(metaclass=abc.ABCMeta):
         return s
 
     @abc.abstractmethod
+    def connect_to(self, prev_layer):
+        raise AssertionError
+
+    @abc.abstractmethod
     def feedforward(self, prev_layer, input_w, input_b):
         raise AssertionError
 
@@ -34,7 +37,13 @@ class Layer(metaclass=abc.ABCMeta):
 
 class InputLayer(Layer):
     def __init__(self, height, width):
-        super().__init__(1, height, width)
+        super().__init__()
+        self.depth  = 1
+        self.height = height
+        self.width  = width
+
+    def connect_to(self, prev_layer):
+        raise AssertionError
 
     def feedforward(self, prev_layer, input_w, input_b):
         raise AssertionError
@@ -45,9 +54,16 @@ class InputLayer(Layer):
 
 class FullyConnectedLayer(Layer):
     def __init__(self, height, act_func):
-        super().__init__(1, height, 1)
+        super().__init__()
+        self.depth  = 1
+        self.height = height
+        self.width  = 1
+
         self.act_func = act_func
         self.der_act_func = f.get_derivative(act_func)
+
+    def connect_to(self, prev_layer):
+        pass
 
     def feedforward(self, prev_layer, input_w, input_b):
         """
@@ -86,12 +102,18 @@ class FullyConnectedLayer(Layer):
 
 
 class ConvolutionalLayer(Layer):
-    def __init__(self, depth, height, width, kernel_size, act_func):
-        super().__init__(depth, height, width)
+    def __init__(self, depth, kernel_size, act_func):
+        super().__init__()
+        self.depth = depth
+
         self.kernel_size = kernel_size
         self.stride_length = 1
         self.act_func = act_func
         self.der_act_func = f.get_derivative(act_func)
+
+    def connect_to(self, prev_layer):
+        self.height = (prev_layer.height-self.kernel_size) // self.stride_length + 1
+        self.width  = (prev_layer.width -self.kernel_size) // self.stride_length + 1
 
     def feedforward(self, prev_layer, input_w, input_b):
         """
@@ -159,12 +181,20 @@ class ConvolutionalLayer(Layer):
 
 
 class PollingLayer(Layer):
-    def __init__(self, depth, height, width, window_size, poll_func):
-        super().__init__(depth, height, width)
+    def __init__(self, window_size, poll_func):
+        super().__init__()
+
         self.window_size = window_size
         self.stride_length = window_size
         self.poll_func = poll_func
         self.der_poll_func = f.get_derivative(poll_func)
+
+    def connect_to(self, prev_layer):
+        assert isinstance(prev_layer, ConvolutionalLayer)
+        self.depth  = prev_layer.depth
+        self.height = (prev_layer.height-self.window_size) // self.stride_length + 1
+        self.width  = (prev_layer.width -self.window_size) // self.stride_length + 1
+
 
     def feedforward(self, prev_layer, input_w, input_b):
         """
