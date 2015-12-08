@@ -23,7 +23,7 @@ def der_sigmoid(x, y=None):
 
 
 def softmax(x):
-    e = np.exp(x)
+    e = np.exp(x - np.max(x))
     return e / np.sum(e)
 
 def der_softmax(x, y=None):
