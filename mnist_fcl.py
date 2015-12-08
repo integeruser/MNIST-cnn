@@ -22,13 +22,9 @@ trn_set, tst_set = u.load_mnist_npz(mnist_npzpath)
 u.print("Building NN...", bcolor=u.bcolors.BOLD)
 net = n.NeuralNetwork([
     l.InputLayer(height=28, width=28),
-    l.FullyConnectedLayer(height=100, act_func=f.sigmoid),
-    l.FullyConnectedLayer(height=10, act_func=f.sigmoid)
-], f.quadratic)
+    l.FullyConnectedLayer(height=10, act_func=f.softmax)
+], f.log_likelihood)
 u.print(net)
 
 u.print("Training NN...", bcolor=u.bcolors.BOLD)
-n.train(net, trn_set, 1, 10, 3.0)
-
-u.print("Testing NN...", bcolor=u.bcolors.BOLD)
-n.test(net, tst_set)
+n.train(net, trn_set, 1, 10, 0.1, vld_set=tst_set)

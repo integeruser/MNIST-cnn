@@ -25,12 +25,9 @@ net = n.NeuralNetwork([
     l.ConvolutionalLayer(depth=2, kernel_size=5, act_func=f.sigmoid),
     l.PollingLayer(window_size=2, poll_func=f.max),
     l.FullyConnectedLayer(height=100, act_func=f.sigmoid),
-    l.FullyConnectedLayer(height=10, act_func=f.sigmoid)
-], f.quadratic)
+    l.FullyConnectedLayer(height=10, act_func=f.softmax)
+], f.log_likelihood)
 print(net)
 
 u.print("Training CNN...", bcolor=u.bcolors.BOLD)
-n.train(net, trn_set, 1, 10, 0.1)
-
-u.print("Testing CNN...", bcolor=u.bcolors.BOLD)
-n.test(net, tst_set)
+n.train(net, trn_set, 1, 10, 0.1, vld_set=tst_set)

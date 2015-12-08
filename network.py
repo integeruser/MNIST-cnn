@@ -78,7 +78,7 @@ class NeuralNetwork():
             self.biases[layer]  -= (eta / len(batch)) * der_biases[layer]
 
 
-def train(net, trn_set, num_epochs, batch_size, eta):
+def train(net, trn_set, num_epochs, batch_size, eta, vld_set=None):
     assert isinstance(net, NeuralNetwork)
     assert num_epochs > 0
     assert batch_size > 0
@@ -94,7 +94,14 @@ def train(net, trn_set, num_epochs, batch_size, eta):
         batches = [inputs[j:j+batch_size] for j in range(0, len(inputs), batch_size)]
         for j, batch in enumerate(batches):
             net.backpropagate(batch, eta)
-            u.print_progress("Epoch %d {bar} [%d/%d]" % (i+1, j+1, len(batches)), now=j+1, end=len(batches))
+            u.print("Epoch %02d %s [%d/%d]" % (i+1, u.bar(j+1, len(batches)), j+1, len(batches)), override=True)
+
+        if vld_set:
+            # test the net at the end of each epoch
+            u.print("Epoch %02d %s [%d/%d] > Testing..." % (i+1, u.bar(j+1, len(batches)), j+1, len(batches)), override=True)
+            accuracy = test(net, vld_set)
+            u.print("Epoch %02d %s [%d/%d] > Accuracy: %0.2f%%" % (i+1, u.bar(j+1, len(batches)), j+1, len(batches), accuracy), override=True)
+        u.print()
 
 def test(net, tst_set):
     assert isinstance(net, NeuralNetwork)
@@ -102,9 +109,10 @@ def test(net, tst_set):
     tst_x, tst_y = tst_set
     tests = [(x, y) for x, y in zip(tst_x, tst_y)]
 
-    ncorrect = 0
+    accuracy = 0
     for x, y in tests:
         net.feedforward(x)
         if np.argmax(net.output_layer.a) == np.argmax(y):
-            ncorrect += 1
-    print("%s correctly classified observations (%0.2f%%)" % (ncorrect, 100*ncorrect/len(tests)))
+            accuracy += 1
+    accuracy *= 100/len(tests)
+    return accuracy
