@@ -24,7 +24,6 @@ net = n.NeuralNetwork([
     l.InputLayer(height=28, width=28),
     l.ConvolutionalLayer(depth=2, kernel_size=5, act_func=f.sigmoid),
     l.PollingLayer(window_size=2, poll_func=f.max),
-    l.FullyConnectedLayer(height=100, act_func=f.sigmoid),
     l.FullyConnectedLayer(height=10, act_func=f.softmax)
 ], f.log_likelihood)
 print(net)
