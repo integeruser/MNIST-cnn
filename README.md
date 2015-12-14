@@ -2,7 +2,7 @@
 This repository contains our project for the Artificial Intelligence course.
 
 ## Usage
-To start, download the well-known MNIST data set (four `.gz` archives) from the the [official location](w) and decompress it:
+To start, download the well-known MNIST data set (four `.gz` archives) from the the [official location](http://yann.lecun.com/exdb/mnist/) and decompress it:
 ```
 Downloads ➤ ls
 t10k-images-idx3-ubyte.gz  t10k-labels-idx1-ubyte.gz  train-images-idx3-ubyte.gz train-labels-idx1-ubyte.gz
