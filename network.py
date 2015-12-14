@@ -57,9 +57,9 @@ class NeuralNetwork():
             b = self.biases[layer]
             layer.feedforward(prev_layer, w, b)
 
-    def backpropagate(self, batch, eta):
-        der_weights = {layer: np.zeros_like(self.weights[layer]) for prev_layer, layer in self.layers}
-        der_biases  = {layer: np.zeros_like(self.biases[layer])  for prev_layer, layer in self.layers}
+    def backpropagate(self, batch, eta, optimizer):
+        der_weights = {layer: np.zeros_like(self.weights[layer]) for _, layer in self.layers}
+        der_biases  = {layer: np.zeros_like(self.biases[layer])  for _, layer in self.layers}
 
         for x, y in batch:
             self.feedforward(x)
@@ -73,12 +73,35 @@ class NeuralNetwork():
                 der_biases[layer]  += der_b
 
         # update weights and biases
-        for prev_layer, layer in self.layers:
-            self.weights[layer] -= (eta / len(batch)) * der_weights[layer]
-            self.biases[layer]  -= (eta / len(batch)) * der_biases[layer]
+        if optimizer == "adadelta":
+            ro  = 0.95
+            eps = 1e-8
+            gsum_weights = {layer: 0 for _, layer in self.layers}
+            xsum_weights = {layer: 0 for _, layer in self.layers}
+            gsum_biases  = {layer: 0 for _, layer in self.layers}
+            xsum_biases  = {layer: 0 for _, layer in self.layers}
+        for _, layer in self.layers:
+            gw = der_weights[layer]/len(batch)
+            gb = der_biases[layer] /len(batch)
+
+            if optimizer == "SGD":
+                self.weights[layer] += -eta*gw
+                self.biases[layer]  += -eta*gb
+            elif optimizer == "adadelta":
+                gsum_weights[layer] = ro*gsum_weights[layer] + (1-ro)*gw*gw
+                dx = -np.sqrt((xsum_weights[layer]+eps)/(gsum_weights[layer]+eps)) * gw
+                self.weights[layer] += dx
+                xsum_weights[layer] = ro*xsum_weights[layer] + (1-ro)*dx*dx
+
+                gsum_biases[layer]  = ro*gsum_biases[layer]  + (1-ro)*gb*gb
+                dx = -np.sqrt((xsum_biases[layer] +eps)/(gsum_biases[layer] +eps)) * gb
+                self.biases[layer]  += dx
+                xsum_biases[layer]  = ro*xsum_biases[layer]  + (1-ro)*dx*dx
+            else:
+                raise NotImplementedError
 
 
-def train(net, trn_set, num_epochs, batch_size, eta, vld_set=None):
+def train(net, trn_set, num_epochs, batch_size, eta, optimizer="SGD", vld_set=None):
     assert isinstance(net, NeuralNetwork)
     assert num_epochs > 0
     assert batch_size > 0
@@ -93,7 +116,7 @@ def train(net, trn_set, num_epochs, batch_size, eta, vld_set=None):
         # divide input observations into batches
         batches = [inputs[j:j+batch_size] for j in range(0, len(inputs), batch_size)]
         for j, batch in enumerate(batches):
-            net.backpropagate(batch, eta)
+            net.backpropagate(batch, eta, optimizer)
             u.print("Epoch %02d %s [%d/%d]" % (i+1, u.bar(j+1, len(batches)), j+1, len(batches)), override=True)
 
         if vld_set:
