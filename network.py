@@ -17,7 +17,7 @@ class NeuralNetwork():
 
         self.layers = [(prev_layer, layer) for prev_layer, layer in zip(layers[:-1], layers[1:])]
 
-        self.loss_func = getattr(f, loss_func)
+        self.loss_func = loss_func
 
         self.weights = dict()
         self.biases = dict()
