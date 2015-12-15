@@ -41,14 +41,6 @@ class NeuralNetwork():
             self.weights[layer] = u.glorot_uniform(w_shape, layer_nin, layer_nout).astype(np.float32)
             self.biases[layer]  = np.zeros(b_shape).astype(np.float32)
 
-    def __str__(self):
-        s = "NeuralNetwork([\n"
-        for prev_layer, layer in self.layers:
-            s += "    %s,\n" % prev_layer
-        s += "    %s\n" % self.output_layer
-        s += "], loss_func=%s)" % self.loss_func.__name__
-        return s
-
     def feedforward(self, x):
         self.input_layer.z = x
         self.input_layer.a = x

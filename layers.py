@@ -12,16 +12,6 @@ class Layer(metaclass=abc.ABCMeta):
         self.height = None
         self.width  = None
 
-    def __str__(self):
-        s = "%s(" % self.__class__.__name__
-        for name, value in sorted(vars(self).items()):
-            if hasattr(vars(self)[name], "__call__"):
-                s += "%s: %s, " % (name, value.__name__)
-            else:
-                s += "%s: %s, " % (name, value)
-        s = s[:-2] + ")"
-        return s
-
     @abc.abstractmethod
     def connect_to(self, prev_layer):
         raise AssertionError

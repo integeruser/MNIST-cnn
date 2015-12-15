@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import inspect
 import sys
 
 import numpy as np
@@ -44,9 +45,9 @@ if __name__ == "__main__":
     u.print("Loading '%s'..." % args.data, bcolor=u.bcolors.BOLD)
     trn_set, tst_set = u.load_mnist_npz(args.data)
 
-    u.print("Building NN...", bcolor=u.bcolors.BOLD)
+    u.print("Loading '%s'..." % args.func, bcolor=u.bcolors.BOLD)
     net, optimizer, num_epochs, batch_size = locals()[args.func]()
-    u.print(net)
+    u.print(inspect.getsource(locals()[args.func]).strip())
 
     u.print("Training NN...", bcolor=u.bcolors.BOLD)
     n.train(net, optimizer, num_epochs, batch_size, trn_set, vld_set=tst_set)
