@@ -25,7 +25,7 @@ mnist.npz: Zip archive data, at least v2.0 to extract
 
 Finally, run the included examples:
 ```
-kanji-ai ➤ time python3 -B -OO examples.py fcl01 data/mnist.npz                                  git:master*
+kanji-ai ➤ time python3 -B -OO examples.py data/mnist.npz fcl01
 Loading 'data/mnist.npz'...
 Building NN...
 NeuralNetwork([
