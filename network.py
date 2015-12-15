@@ -89,15 +89,15 @@ class NeuralNetwork():
                 self.weights[layer] += -optimizer["eta"]*gw
                 self.biases[layer]  += -optimizer["eta"]*gb
             elif optimizer["type"] == "adadelta":
-                gsum_weights[layer] = ro*gsum_weights[layer] + (1-ro)*gw*gw
+                gsum_weights[layer] = rho*gsum_weights[layer] + (1-rho)*gw*gw
                 dx = -np.sqrt((xsum_weights[layer]+eps)/(gsum_weights[layer]+eps)) * gw
                 self.weights[layer] += dx
-                xsum_weights[layer] = ro*xsum_weights[layer] + (1-ro)*dx*dx
+                xsum_weights[layer] = rho*xsum_weights[layer] + (1-rho)*dx*dx
 
-                gsum_biases[layer]  = ro*gsum_biases[layer]  + (1-ro)*gb*gb
+                gsum_biases[layer]  = rho*gsum_biases[layer]  + (1-rho)*gb*gb
                 dx = -np.sqrt((xsum_biases[layer] +eps)/(gsum_biases[layer] +eps)) * gb
                 self.biases[layer]  += dx
-                xsum_biases[layer]  = ro*xsum_biases[layer]  + (1-ro)*dx*dx
+                xsum_biases[layer]  = rho*xsum_biases[layer]  + (1-rho)*dx*dx
             else:
                 raise NotImplementedError
 
