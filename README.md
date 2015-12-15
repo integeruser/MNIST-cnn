@@ -25,23 +25,16 @@ mnist.npz: Zip archive data, at least v2.0 to extract
 
 Finally, run the included examples:
 ```
-kanji-ai ➤ time python3 -B mnist_fcl.py mnist.npz
-Loading 'mnist.npz'...
+kanji-ai ➤ time python3 -B -OO examples.py fcl01 data/mnist.npz                                  git:master*
+Loading 'data/mnist.npz'...
 Building NN...
+NeuralNetwork([
+    InputLayer(depth: 1, height: 28, width: 28),
+    FullyConnectedLayer(act_func: softmax, depth: 1, der_act_func: der_softmax, height: 10, width: 1)
+], loss_func=log_likelihood)
 Training NN...
-Epoch 1
-Testing NN...
-9574 correctly classified observations (95.74%)
-python3 -B mnist_fcl.py mnist.npz  26.40s user 4.30s system 135% cpu 22.577 total
-
-kanji-ai ➤ time python3 -B mnist_cnn.py mnist.npz
-Loading 'mnist.npz'...
-Building CNN...
-Training CNN...
-Epoch 1
-Testing CNN...
-6576 correctly classified observations (65.76%)
-python3 -B mnist_cnn.py mnist.npz  548.65s user 1.35s system 99% cpu 9:10.50 total
+Epoch 01 [==========] [6000/6000 batches] > Accuracy: 91.75%
+python3 -B -OO examples.py fcl01 data/mnist.npz  10.56s user 1.69s system 107% cpu 11.442 total
 ```
 
 ## License
