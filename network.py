@@ -74,8 +74,8 @@ class NeuralNetwork():
                 der_biases[layer]  += der_b
 
         # update weights and biases
-        if optimizer == "adadelta":
-            ro  = 0.95
+        if optimizer["type"] == "adadelta":
+            rho = 0.95
             eps = 1e-8
             gsum_weights = {layer: 0 for _, layer in self.layers}
             xsum_weights = {layer: 0 for _, layer in self.layers}
