@@ -123,7 +123,7 @@ def train(net, optimizer, num_epochs, batch_size, trn_set, vld_set=None):
             # test the net at the end of each epoch
             u.print("Epoch %02d %s [%d/%d] > Testing..." % (i+1, u.bar(j+1, len(batches)), j+1, len(batches)), override=True)
             accuracy = test(net, vld_set)
-            u.print("Epoch %02d %s [%d/%d] > Accuracy: %0.2f%%" % (i+1, u.bar(j+1, len(batches)), j+1, len(batches), accuracy), override=True)
+            u.print("Epoch %02d %s [%d/%d] > Accuracy: %0.2f%%" % (i+1, u.bar(j+1, len(batches)), j+1, len(batches), accuracy*100), override=True)
         u.print()
 
 def test(net, tst_set):
@@ -137,5 +137,5 @@ def test(net, tst_set):
         net.feedforward(x)
         if np.argmax(net.output_layer.a) == np.argmax(y):
             accuracy += 1
-    accuracy *= 100/len(tests)
+    accuracy /= len(tests)
     return accuracy
