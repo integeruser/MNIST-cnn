@@ -1,17 +1,6 @@
 import numpy as np
 
 
-def get_derivative(func):
-    derivatives = {
-        sigmoid: der_sigmoid,
-        softmax: der_softmax,
-
-        max: der_max
-    }
-    assert func in derivatives
-    return derivatives[func]
-
-
 ### activations functions #####################################################
 
 def sigmoid(x):

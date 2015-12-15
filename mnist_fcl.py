@@ -22,8 +22,8 @@ trn_set, tst_set = u.load_mnist_npz(mnist_npzpath)
 u.print("Building NN...", bcolor=u.bcolors.BOLD)
 net = n.NeuralNetwork([
     l.InputLayer(height=28, width=28),
-    l.FullyConnectedLayer(height=10, act_func=f.softmax)
-], f.log_likelihood)
+    l.FullyConnectedLayer(height=10, act_func="softmax")
+], "log_likelihood")
 u.print(net)
 
 u.print("Training NN...", bcolor=u.bcolors.BOLD)

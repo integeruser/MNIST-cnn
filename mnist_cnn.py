@@ -22,10 +22,10 @@ trn_set, tst_set = u.load_mnist_npz(mnist_npzpath)
 u.print("Building CNN...", bcolor=u.bcolors.BOLD)
 net = n.NeuralNetwork([
     l.InputLayer(height=28, width=28),
-    l.ConvolutionalLayer(depth=2, kernel_size=5, act_func=f.sigmoid),
-    l.PollingLayer(window_size=2, poll_func=f.max),
-    l.FullyConnectedLayer(height=10, act_func=f.softmax)
-], f.log_likelihood)
+    l.ConvolutionalLayer(depth=2, kernel_size=5, act_func="sigmoid"),
+    l.PollingLayer(window_size=2, poll_func="max"),
+    l.FullyConnectedLayer(height=10, act_func="softmax")
+], "log_likelihood")
 print(net)
 
 u.print("Training CNN...", bcolor=u.bcolors.BOLD)

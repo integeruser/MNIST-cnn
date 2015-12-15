@@ -58,9 +58,8 @@ class FullyConnectedLayer(Layer):
         self.depth  = 1
         self.height = height
         self.width  = 1
-
-        self.act_func = act_func
-        self.der_act_func = f.get_derivative(act_func)
+        self.act_func     = getattr(f, act_func)
+        self.der_act_func = getattr(f, "der_%s" % act_func)
 
     def connect_to(self, prev_layer):
         pass
@@ -108,8 +107,8 @@ class ConvolutionalLayer(Layer):
 
         self.kernel_size = kernel_size
         self.stride_length = 1
-        self.act_func = act_func
-        self.der_act_func = f.get_derivative(act_func)
+        self.act_func     = getattr(f, act_func)
+        self.der_act_func = getattr(f, "der_%s" % act_func)
 
     def connect_to(self, prev_layer):
         self.height = (prev_layer.height-self.kernel_size) // self.stride_length + 1
@@ -186,8 +185,8 @@ class PollingLayer(Layer):
 
         self.window_size = window_size
         self.stride_length = window_size
-        self.poll_func = poll_func
-        self.der_poll_func = f.get_derivative(poll_func)
+        self.poll_func     = getattr(f, poll_func)
+        self.der_poll_func = getattr(f, "der_%s" % poll_func)
 
     def connect_to(self, prev_layer):
         assert isinstance(prev_layer, ConvolutionalLayer)
