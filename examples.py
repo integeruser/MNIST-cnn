@@ -35,8 +35,8 @@ def cnn01():  # 88.13%
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("func", help="the function name of the example to be run")
     parser.add_argument("data", help="the path to the MNIST data set in .npz format (generated using utils.py)")
+    parser.add_argument("func", help="the function name of the example to be run")
     args = parser.parse_args()
 
     np.random.seed(314)
