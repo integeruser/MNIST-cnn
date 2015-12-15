@@ -58,7 +58,7 @@ class NeuralNetwork():
             b = self.biases[layer]
             layer.feedforward(prev_layer, w, b)
 
-    def backpropagate(self, batch, eta, optimizer):
+    def backpropagate(self, batch, optimizer):
         der_weights = {layer: np.zeros_like(self.weights[layer]) for _, layer in self.layers}
         der_biases  = {layer: np.zeros_like(self.biases[layer])  for _, layer in self.layers}
 
@@ -85,10 +85,10 @@ class NeuralNetwork():
             gw = der_weights[layer]/len(batch)
             gb = der_biases[layer] /len(batch)
 
-            if optimizer == "SGD":
-                self.weights[layer] += -eta*gw
-                self.biases[layer]  += -eta*gb
-            elif optimizer == "adadelta":
+            if optimizer["type"] == "SGD":
+                self.weights[layer] += -optimizer["eta"]*gw
+                self.biases[layer]  += -optimizer["eta"]*gb
+            elif optimizer["type"] == "adadelta":
                 gsum_weights[layer] = ro*gsum_weights[layer] + (1-ro)*gw*gw
                 dx = -np.sqrt((xsum_weights[layer]+eps)/(gsum_weights[layer]+eps)) * gw
                 self.weights[layer] += dx
@@ -102,11 +102,10 @@ class NeuralNetwork():
                 raise NotImplementedError
 
 
-def train(net, trn_set, num_epochs, batch_size, eta, optimizer="SGD", vld_set=None):
+def train(net, trn_set, num_epochs, batch_size, optimizer, vld_set=None):
     assert isinstance(net, NeuralNetwork)
     assert num_epochs > 0
     assert batch_size > 0
-    assert eta > 0
 
     trn_x, trn_y = trn_set
     inputs = [(x, y) for x, y in zip(trn_x, trn_y)]
@@ -117,7 +116,7 @@ def train(net, trn_set, num_epochs, batch_size, eta, optimizer="SGD", vld_set=No
         # divide input observations into batches
         batches = [inputs[j:j+batch_size] for j in range(0, len(inputs), batch_size)]
         for j, batch in enumerate(batches):
-            net.backpropagate(batch, eta, optimizer)
+            net.backpropagate(batch, optimizer)
             u.print("Epoch %02d %s [%d/%d]" % (i+1, u.bar(j+1, len(batches)), j+1, len(batches)), override=True)
 
         if vld_set:

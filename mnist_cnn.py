@@ -29,4 +29,5 @@ net = n.NeuralNetwork([
 print(net)
 
 u.print("Training CNN...", bcolor=u.bcolors.BOLD)
-n.train(net, trn_set, 1, 10, 0.1, vld_set=tst_set)
+optimizer = {"type": "SGD", "eta": 0.1}
+n.train(net, trn_set, 1, 10, optimizer, vld_set=tst_set)
