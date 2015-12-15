@@ -28,4 +28,6 @@ u.print(net)
 
 u.print("Training NN...", bcolor=u.bcolors.BOLD)
 optimizer = {"type": "SGD", "eta": 0.1}
-n.train(net, trn_set, 1, 10, optimizer, vld_set=tst_set)
+num_epochs = 1
+batch_size = 10
+n.train(net, optimizer, num_epochs, batch_size, trn_set, vld_set=tst_set)

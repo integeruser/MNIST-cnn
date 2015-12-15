@@ -102,7 +102,7 @@ class NeuralNetwork():
                 raise NotImplementedError
 
 
-def train(net, trn_set, num_epochs, batch_size, optimizer, vld_set=None):
+def train(net, optimizer, num_epochs, batch_size, trn_set, vld_set=None):
     assert isinstance(net, NeuralNetwork)
     assert num_epochs > 0
     assert batch_size > 0
