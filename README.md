@@ -1,5 +1,6 @@
-# kanji-ai
+# MNIST-cnn
 This repository contains our project for the Artificial Intelligence course.
+
 
 ## Usage
 To start, download the well-known MNIST data set (four `.gz` archives) from the the [official location](http://yann.lecun.com/exdb/mnist/) and decompress it:
