@@ -1,47 +1,67 @@
 # MNIST-cnn
-This repository contains our project for the Artificial Intelligence course.
+This repository contains a Python implementation of a neural network with convolutional and polling layers. The purpose of this project was to correctly implement backpropagation on convolutional networks, and the code here provided could be useful only for educational purposes. To demonstrate the correctness of our network we tested it on the well-known [MNIST](http://yann.lecun.com/exdb/mnist/) data set.
+
+Alessandro and Francesco
 
 
-## Usage
-To start, download the well-known MNIST data set (four `.gz` archives) from the the [official location](http://yann.lecun.com/exdb/mnist/) and decompress it:
+## Prerequisites
+The code uses the [NumPy](http://www.numpy.org/) and [SciPy](https://www.scipy.org/) libraries. Install the required dependencies with:
 ```
+pip3 install numpy scipy
+```
+
+Then, download the MNIST data set (four `.gz` archives, see link above) and decompress it:
+```
+~ ➤ cd Downloads
+Downloads ➤ pwd
+/Users/fcagnin/Downloads
 Downloads ➤ ls
 t10k-images-idx3-ubyte.gz  t10k-labels-idx1-ubyte.gz  train-images-idx3-ubyte.gz train-labels-idx1-ubyte.gz
 Downloads ➤ gzip -d *
 Downloads ➤ ls
 t10k-images-idx3-ubyte  t10k-labels-idx1-ubyte  train-images-idx3-ubyte train-labels-idx1-ubyte
 ```
-Then, use `build_mnist_npz()` from `utils.py` to build `mnist.npz`:
+
+
+## Usage
+Convert the downloaded data set into the more convenient NPZ binary data format using the function `build_mnist_npz()` from `utils.py`:
 ```
-kanji-ai ➤ python3
-Python 3.5.0 (default, Sep 23 2015, 04:41:38)
-[GCC 4.2.1 Compatible Apple LLVM 7.0.0 (clang-700.0.72)] on darwin
-Type "help", "copyright", "credits" or "license" for more information.
+MNIST-cnn ➤ ls
+README.md src
+MNIST-cnn ➤ cd src
+src ➤ ls
+examples.py  functions.py layers.py    network.py   utils.py
+src ➤ python3 -q
 >>> import utils
 >>> utils.build_mnist_npz('/Users/fcagnin/Downloads')
->>>
-kanji-ai ➤ file mnist.npz
+>>> exit()
+src ➤ file mnist.npz
 mnist.npz: Zip archive data, at least v2.0 to extract
 ```
 
-Finally, run the included examples:
+Run any of the included examples:
 ```
-kanji-ai ➤ time python3 -B -OO examples.py data/mnist.npz fcl01
-Loading 'data/mnist.npz'...
-Building NN...
-NeuralNetwork([
-    InputLayer(depth: 1, height: 28, width: 28),
-    FullyConnectedLayer(act_func: softmax, depth: 1, der_act_func: der_softmax, height: 10, width: 1)
-], loss_func=log_likelihood)
+src ➤ python3 examples.py mnist.npz fcl01
+Loading 'mnist.npz'...
+Loading 'fcl01'...
+def fcl01():  # 91.75%
+    net = n.NeuralNetwork([
+        l.InputLayer(height=28, width=28),
+        l.FullyConnectedLayer(height=10, act_func=f.softmax)
+    ], f.log_likelihood)
+    optimizer = {"type": "SGD", "eta": 0.1}
+    num_epochs = 1
+    batch_size = 10
+    return net, optimizer, num_epochs, batch_size
 Training NN...
 Epoch 01 [==========] [6000/6000 batches] > Accuracy: 91.75%
-python3 -B -OO examples.py fcl01 data/mnist.npz  10.56s user 1.69s system 107% cpu 11.442 total
 ```
+
 
 ## License
 The MIT License (MIT)
 
-Copyright (c) 2015 Alessandro Torcinovich, Francesco Cagnin
+Copyright (c) 2015-2016 Alessandro Torcinovich, Francesco Cagnin
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
