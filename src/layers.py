@@ -182,7 +182,6 @@ class MaxPoolingLayer(Layer):
         self.height = (prev_layer.height-self.window_size) // self.stride_length + 1
         self.width  = (prev_layer.width -self.window_size) // self.stride_length + 1
 
-
     def feedforward(self, prev_layer, w, b):
         """
         Feedforward the observation through the layer
