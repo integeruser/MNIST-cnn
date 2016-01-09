@@ -248,7 +248,7 @@ class MaxPoolingLayer(Layer):
                     assert src_window.shape == dst_window.shape == (self.pool_size, self.pool_size)
                     # upsampling: the unit which was the max at the forward propagation
                     # receives all the error at backward propagation
+                    assert not np.any(dst_window)
                     dst_window[np.unravel_index(src_window.argmax(), src_window.shape)] = err[i, j]
-                    assert np.sum(dst_window) == 1
 
         return der_w, der_b, delta_zl
