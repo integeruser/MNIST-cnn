@@ -45,7 +45,7 @@ def log_likelihood(a, y):
     return -1.0 / a[np.where(y == 1)]
 
 
-### polling functions #########################################################
+### pooling functions #########################################################
 
 def max(x):
     return np.max(x)

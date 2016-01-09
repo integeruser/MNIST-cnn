@@ -169,14 +169,14 @@ class ConvolutionalLayer(Layer):
         return der_w, der_b, delta_zl
 
 
-class PollingLayer(Layer):
-    def __init__(self, window_size, poll_func):
+class PoolingLayer(Layer):
+    def __init__(self, window_size, pool_func):
         super().__init__()
 
         self.window_size = window_size
         self.stride_length = window_size
-        self.poll_func = poll_func
-        self.der_poll_func = getattr(f, "der_%s" % poll_func.__name__)
+        self.pool_func = pool_func
+        self.der_pool_func = getattr(f, "der_%s" % pool_func.__name__)
 
     def connect_to(self, prev_layer):
         assert isinstance(prev_layer, ConvolutionalLayer)
@@ -191,8 +191,8 @@ class PollingLayer(Layer):
 
         :param prev_layer: the previous layer of the network. The activations of the previous layer must be a list of
             feature maps, where each feature map is a 3d matrix
-        :param w: should be an empty array (no weights between a convolutional layer and a polling layer)
-        :param b: should be an empty array (no biases in a polling layer)
+        :param w: should be an empty array (no weights between a convolutional layer and a pooling layer)
+        :param b: should be an empty array (no biases in a pooling layer)
         """
         assert isinstance(prev_layer, ConvolutionalLayer)
         assert prev_layer.depth == self.depth
@@ -213,13 +213,13 @@ class PollingLayer(Layer):
                     assert src_window.shape == (self.window_size, self.window_size)
                     i = m // self.window_size
                     j = n // self.window_size
-                    dst[i, j] = self.poll_func(src_window)
+                    dst[i, j] = self.pool_func(src_window)
 
         self.a = self.z
 
     def backpropagate(self, prev_layer, w, delta_z):
         """
-        Backpropagate the error through the layer. Given any pair source(convolutional)/destination(polling) feature
+        Backpropagate the error through the layer. Given any pair source(convolutional)/destination(pooling) feature
         maps, each unit of the destination feature map propagates an error to a window (self.window_size, self.window_size)
         of the source feature map
 
@@ -249,6 +249,6 @@ class PollingLayer(Layer):
                     src_window = src[m:m+self.window_size, n:n+self.window_size]
                     dst_window = dst[m:m+self.window_size, n:n+self.window_size]
                     assert src_window.shape == dst_window.shape == (self.window_size, self.window_size)
-                    dst_window[:] *= self.der_poll_func(src_window)
+                    dst_window[:] *= self.der_pool_func(src_window)
 
         return der_w, der_b, delta_zl
