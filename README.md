@@ -21,6 +21,7 @@ Downloads ➤ gzip -d *
 Downloads ➤ ls
 t10k-images-idx3-ubyte  t10k-labels-idx1-ubyte  train-images-idx3-ubyte train-labels-idx1-ubyte
 ```
+**Warning**: on Windows, as per my tests, the extracted files will have a different name of the ones showed above (e.g. `train-images-idx3-ubyte` will be `train-images.idx3-ubyte`). You can either manually rename the extracted files or modify lines 9-12 of `utils.py` to match these different file names.
 
 
 ## Usage
