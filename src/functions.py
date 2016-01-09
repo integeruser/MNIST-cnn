@@ -43,14 +43,3 @@ def cross_entropy(a, y):
 
 def log_likelihood(a, y):
     return -1.0 / a[np.where(y == 1)]
-
-
-### pooling functions #########################################################
-
-def max(x):
-    return np.max(x)
-
-def der_max(x):
-    der = np.zeros_like(x, dtype=np.uint8)
-    der[np.unravel_index(x.argmax(), x.shape)] = 1
-    return der

@@ -33,7 +33,7 @@ class NeuralNetwork():
             elif type(layer) is l.ConvolutionalLayer:
                 w_shape = (layer.depth, prev_layer.depth, layer.kernel_size, layer.kernel_size)
                 b_shape = (layer.depth, 1)
-            elif type(layer) is l.PoolingLayer:
+            elif type(layer) is l.MaxPoolingLayer:
                 w_shape = (0)
                 b_shape = (0)
             else:

@@ -169,14 +169,12 @@ class ConvolutionalLayer(Layer):
         return der_w, der_b, delta_zl
 
 
-class PoolingLayer(Layer):
-    def __init__(self, window_size, pool_func):
+class MaxPoolingLayer(Layer):
+    def __init__(self, window_size):
         super().__init__()
 
         self.window_size = window_size
         self.stride_length = window_size
-        self.pool_func = pool_func
-        self.der_pool_func = getattr(f, "der_%s" % pool_func.__name__)
 
     def connect_to(self, prev_layer):
         assert isinstance(prev_layer, ConvolutionalLayer)
@@ -213,7 +211,8 @@ class PoolingLayer(Layer):
                     assert src_window.shape == (self.window_size, self.window_size)
                     i = m // self.window_size
                     j = n // self.window_size
-                    dst[i, j] = self.pool_func(src_window)
+                    # max() pooling
+                    dst[i, j] = np.max(src_window)
 
         self.a = self.z
 
@@ -249,6 +248,9 @@ class PoolingLayer(Layer):
                     src_window = src[m:m+self.window_size, n:n+self.window_size]
                     dst_window = dst[m:m+self.window_size, n:n+self.window_size]
                     assert src_window.shape == dst_window.shape == (self.window_size, self.window_size)
-                    dst_window[:] *= self.der_pool_func(src_window)
+                    # derivative of max()
+                    der = np.zeros_like(src_window, dtype=np.uint8)
+                    der[np.unravel_index(src_window.argmax(), src_window.shape)] = 1
+                    dst_window[:] *= der
 
         return der_w, der_b, delta_zl
