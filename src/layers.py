@@ -170,17 +170,17 @@ class ConvolutionalLayer(Layer):
 
 
 class MaxPoolingLayer(Layer):
-    def __init__(self, window_size):
+    def __init__(self, pool_size):
         super().__init__()
 
-        self.window_size = window_size
+        self.pool_size = pool_size
 
     def connect_to(self, prev_layer):
         assert isinstance(prev_layer, ConvolutionalLayer)
         self.depth  = prev_layer.depth
-        stride_length = self.window_size
-        self.height = ((prev_layer.height-self.window_size) // stride_length) + 1
-        self.width  = ((prev_layer.width -self.window_size) // stride_length) + 1
+        stride_length = self.pool_size
+        self.height = ((prev_layer.height-self.pool_size) // stride_length) + 1
+        self.width  = ((prev_layer.width -self.pool_size) // stride_length) + 1
 
     def feedforward(self, prev_layer, w, b):
         """
@@ -198,16 +198,16 @@ class MaxPoolingLayer(Layer):
         assert b.size == 0
 
         prev_layer_fmap_size = prev_layer.height
-        assert prev_layer_fmap_size % self.window_size == 0
+        assert prev_layer_fmap_size % self.pool_size == 0
 
         self.z = np.zeros((self.depth, self.height, self.width))
         for t, r in zip(range(prev_layer.depth), range(self.depth)):
             src = prev_layer.a[t, 0]
             dst =       self.z[r]
-            for i, m in enumerate(range(0, prev_layer.height, self.window_size)):
-                for j, n in enumerate(range(0, prev_layer.width, self.window_size)):
-                    src_window = src[m:m+self.window_size, n:n+self.window_size]
-                    assert src_window.shape == (self.window_size, self.window_size)
+            for i, m in enumerate(range(0, prev_layer.height, self.pool_size)):
+                for j, n in enumerate(range(0, prev_layer.width, self.pool_size)):
+                    src_window = src[m:m+self.pool_size, n:n+self.pool_size]
+                    assert src_window.shape == (self.pool_size, self.pool_size)
                     # downsampling
                     dst[i, j] = np.max(src_window)
 
@@ -216,7 +216,7 @@ class MaxPoolingLayer(Layer):
     def backpropagate(self, prev_layer, w, delta_z):
         """
         Backpropagate the error through the layer. Given any pair source(convolutional)/destination(pooling) feature
-        maps, each unit of the destination feature map propagates an error to a window (self.window_size, self.window_size)
+        maps, each unit of the destination feature map propagates an error to a window (self.pool_size, self.pool_size)
         of the source feature map
 
         :param prev_layer: the previous layer of the network
@@ -234,18 +234,18 @@ class MaxPoolingLayer(Layer):
 
         der_b = np.array([])
 
-        delta_zl = np.kron(delta_z, np.zeros((self.window_size, self.window_size)))
+        delta_zl = np.kron(delta_z, np.zeros((self.pool_size, self.pool_size)))
         delta_zl = np.expand_dims(delta_zl, axis=1)
         assert delta_zl.shape == (prev_layer.depth, 1, prev_layer.height, prev_layer.width)
         for t, r in zip(range(prev_layer.depth), range(self.depth)):
             src = prev_layer.a[t, 0]
             err =      delta_z[t]
             dst =     delta_zl[r, 0]
-            for i, m in enumerate(range(0, prev_layer.height, self.window_size)):
-                for j, n in enumerate(range(0, prev_layer.width, self.window_size)):
-                    src_window = src[m:m+self.window_size, n:n+self.window_size]
-                    dst_window = dst[m:m+self.window_size, n:n+self.window_size]
-                    assert src_window.shape == dst_window.shape == (self.window_size, self.window_size)
+            for i, m in enumerate(range(0, prev_layer.height, self.pool_size)):
+                for j, n in enumerate(range(0, prev_layer.width, self.pool_size)):
+                    src_window = src[m:m+self.pool_size, n:n+self.pool_size]
+                    dst_window = dst[m:m+self.pool_size, n:n+self.pool_size]
+                    assert src_window.shape == dst_window.shape == (self.pool_size, self.pool_size)
                     # upsampling: the unit which was the max at the forward propagation
                     # receives all the error at backward propagation
                     dst_window[np.unravel_index(src_window.argmax(), src_window.shape)] = err[i, j]
