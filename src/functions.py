@@ -1,7 +1,7 @@
 import numpy as np
 
 
-### activations functions #####################################################
+### activations functions ######################################################
 
 def sigmoid(x):
     return 1.0 / (1.0 + np.exp(-x))
@@ -25,21 +25,15 @@ def der_softmax(x, y=None):
     return s * (1 - s)
 
 
-### loss functions (computed on a single observation) #########################
+### loss functions #############################################################
 
 def quadratic(a, y):
-    return a - y
-
-
-def categorical_crossentropy(a, y):
-    a_rescaled = np.copy(a) / np.sum(a, axis=-1)
-    c = -np.sum(y * np.log(a_rescaled), axis=a_rescaled.ndim - 1)
-    return np.mean(c, axis=-1)
-
-
-def cross_entropy(a, y):
-    return (a - y) / (a - a ** 2)
-
+    return a-y
 
 def log_likelihood(a, y):
     return -1.0 / a[np.where(y == 1)]
+
+def categorical_crossentropy(a, y):
+    a = a.flatten() / np.sum(a)
+    i = np.where(y.flatten() == 1)
+    return np.log(a)[i]
