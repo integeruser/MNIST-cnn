@@ -162,11 +162,9 @@ class ConvolutionalLayer(Layer):
                 src =    delta_z[r]
                 kernel = w[r, t]
                 dst =    delta_zl[t]
-                for m in range(0, prev_layer.height, self.kernel_size):
-                    for n in range(0, prev_layer.width, self.kernel_size):
+                for i, m in enumerate(range(0, prev_layer.height, self.kernel_size)):
+                    for j, n in enumerate(range(0, prev_layer.width, self.kernel_size)):
                         dst_window = dst[m:m+self.kernel_size, n:n+self.kernel_size]
-                        i = m // self.kernel_size
-                        j = n // self.kernel_size
                         rows, cols = dst_window.shape
                         dst_window += kernel[:rows, :cols] * src[i, j]
 
