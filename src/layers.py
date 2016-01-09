@@ -204,13 +204,11 @@ class MaxPoolingLayer(Layer):
         for t, r in zip(range(prev_layer.depth), range(self.depth)):
             src = prev_layer.a[t, 0]
             dst =       self.z[r]
-            for m in range(0, prev_layer.height, self.window_size):
-                for n in range(0, prev_layer.width, self.window_size):
+            for i, m in enumerate(range(0, prev_layer.height, self.window_size)):
+                for j, n in enumerate(range(0, prev_layer.width, self.window_size)):
                     src_window = src[m:m+self.window_size, n:n+self.window_size]
                     assert src_window.shape == (self.window_size, self.window_size)
-                    i = m // self.window_size
-                    j = n // self.window_size
-                    # max() pooling
+                    # downsampling
                     dst[i, j] = np.max(src_window)
 
         self.a = self.z
@@ -236,21 +234,21 @@ class MaxPoolingLayer(Layer):
 
         der_b = np.array([])
 
-        delta_zl = np.kron(delta_z, np.ones((self.window_size, self.window_size)))
+        delta_zl = np.kron(delta_z, np.zeros((self.window_size, self.window_size)))
         delta_zl = np.expand_dims(delta_zl, axis=1)
         assert delta_zl.shape == (prev_layer.depth, 1, prev_layer.height, prev_layer.width)
         for t, r in zip(range(prev_layer.depth), range(self.depth)):
             src = prev_layer.a[t, 0]
+            err =      delta_z[t]
             dst =     delta_zl[r, 0]
-            for m in range(0, prev_layer.height, self.window_size):
-                for n in range(0, prev_layer.width, self.window_size):
+            for i, m in enumerate(range(0, prev_layer.height, self.window_size)):
+                for j, n in enumerate(range(0, prev_layer.width, self.window_size)):
                     src_window = src[m:m+self.window_size, n:n+self.window_size]
                     dst_window = dst[m:m+self.window_size, n:n+self.window_size]
                     assert src_window.shape == dst_window.shape == (self.window_size, self.window_size)
-                    # derivative of max(): all zeros except where src_window was the max value
-                    der = np.zeros_like(src_window, dtype=np.uint8)
-                    der[np.unravel_index(src_window.argmax(), src_window.shape)] = 1
-                    assert np.sum(der) == 1
-                    dst_window[:] *= der
+                    # upsampling: the unit which was the max at the forward propagation
+                    # receives all the error at backward propagation
+                    dst_window[np.unravel_index(src_window.argmax(), src_window.shape)] = err[i, j]
+                    assert np.sum(dst_window) == 1
 
         return der_w, der_b, delta_zl
