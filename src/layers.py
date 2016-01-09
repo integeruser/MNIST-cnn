@@ -117,12 +117,16 @@ class ConvolutionalLayer(Layer):
         assert prev_layer.a.ndim == 3
         assert w.shape == (self.depth, prev_layer.depth, self.kernel_size, self.kernel_size)
         assert b.shape == (self.depth, 1)
+
         self.z = np.array([scipy.signal.convolve(prev_layer.a, fmap, mode="valid") for fmap in w])
+        assert self.z.shape[1] == 1
+        self.z = np.squeeze(self.z, axis=1)
+        assert self.z.ndim == 3
         for r in range(self.depth):
             self.z[r] += b[r]
 
         self.a = np.vectorize(self.act_func)(self.z)
-        assert self.z.shape == self.a.shape
+        assert self.a.shape == self.z.shape
 
     def backpropagate(self, prev_layer, w, delta_z):
         """
@@ -140,7 +144,7 @@ class ConvolutionalLayer(Layer):
         for t in range(prev_layer.depth):
             for r in range(self.depth):
                 src = prev_layer.a[t]
-                err =      delta_z[r, t]
+                err =      delta_z[r]
                 dst =  der_w[r, t]
                 for h in range(self.kernel_size):
                     for v in range(self.kernel_size):
@@ -155,7 +159,7 @@ class ConvolutionalLayer(Layer):
         delta_zl = np.zeros_like(prev_layer.a)
         for t in range(prev_layer.depth):
             for r in range(self.depth):
-                src =    delta_z[r, t]
+                src =    delta_z[r]
                 kernel = w[r, t]
                 dst =    delta_zl[t]
                 for m in range(0, prev_layer.height, self.kernel_size):
@@ -193,7 +197,7 @@ class MaxPoolingLayer(Layer):
         """
         assert isinstance(prev_layer, ConvolutionalLayer)
         assert prev_layer.depth == self.depth
-        assert prev_layer.a.ndim == 4
+        assert prev_layer.a.ndim == 3
         assert w.size == 0
         assert b.size == 0
 
@@ -202,7 +206,7 @@ class MaxPoolingLayer(Layer):
 
         self.z = np.zeros((self.depth, self.height, self.width))
         for t, r in zip(range(prev_layer.depth), range(self.depth)):
-            src = prev_layer.a[t, 0]
+            src = prev_layer.a[t]
             dst =       self.z[r]
             for i, m in enumerate(range(0, prev_layer.height, self.pool_size)):
                 for j, n in enumerate(range(0, prev_layer.width, self.pool_size)):
@@ -226,7 +230,7 @@ class MaxPoolingLayer(Layer):
         """
         assert isinstance(prev_layer, ConvolutionalLayer)
         assert prev_layer.depth == self.depth
-        assert prev_layer.a.ndim == 4
+        assert prev_layer.a.ndim == 3
         assert w.size == 0
         assert delta_z.shape == (self.depth, self.height, self.width)
 
@@ -235,12 +239,11 @@ class MaxPoolingLayer(Layer):
         der_b = np.array([])
 
         delta_zl = np.kron(delta_z, np.zeros((self.pool_size, self.pool_size)))
-        delta_zl = np.expand_dims(delta_zl, axis=1)
-        assert delta_zl.shape == (prev_layer.depth, 1, prev_layer.height, prev_layer.width)
+        assert delta_zl.shape == (prev_layer.depth, prev_layer.height, prev_layer.width)
         for t, r in zip(range(prev_layer.depth), range(self.depth)):
-            src = prev_layer.a[t, 0]
+            src = prev_layer.a[t]
             err =      delta_z[t]
-            dst =     delta_zl[r, 0]
+            dst =     delta_zl[r]
             for i, m in enumerate(range(0, prev_layer.height, self.pool_size)):
                 for j, n in enumerate(range(0, prev_layer.width, self.pool_size)):
                     src_window = src[m:m+self.pool_size, n:n+self.pool_size]
