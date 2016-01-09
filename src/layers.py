@@ -96,13 +96,13 @@ class ConvolutionalLayer(Layer):
         self.depth = depth
 
         self.kernel_size = kernel_size
-        self.stride_length = 1
         self.act_func = act_func
         self.der_act_func = getattr(f, "der_%s" % act_func.__name__)
 
     def connect_to(self, prev_layer):
-        self.height = (prev_layer.height-self.kernel_size) // self.stride_length + 1
-        self.width  = (prev_layer.width -self.kernel_size) // self.stride_length + 1
+        stride_length = 1
+        self.height = ((prev_layer.height-self.kernel_size) // stride_length) + 1
+        self.width  = ((prev_layer.width -self.kernel_size) // stride_length) + 1
 
     def feedforward(self, prev_layer, w, b):
         """
@@ -144,8 +144,8 @@ class ConvolutionalLayer(Layer):
                 dst =  der_w[r, t]
                 for h in range(self.kernel_size):
                     for v in range(self.kernel_size):
-                        src_window = src[v:self.height:self.stride_length, h:self.width:self.stride_length]
-                        err_window = err[v:self.height:self.stride_length, h:self.width:self.stride_length]
+                        src_window = src[v:self.height, h:self.width]
+                        err_window = err[v:self.height, h:self.width]
                         dst[h, v] = np.sum(src_window * err_window)
 
         der_b = np.empty((self.depth, 1))
@@ -174,13 +174,13 @@ class MaxPoolingLayer(Layer):
         super().__init__()
 
         self.window_size = window_size
-        self.stride_length = window_size
 
     def connect_to(self, prev_layer):
         assert isinstance(prev_layer, ConvolutionalLayer)
         self.depth  = prev_layer.depth
-        self.height = (prev_layer.height-self.window_size) // self.stride_length + 1
-        self.width  = (prev_layer.width -self.window_size) // self.stride_length + 1
+        stride_length = self.window_size
+        self.height = ((prev_layer.height-self.window_size) // stride_length) + 1
+        self.width  = ((prev_layer.width -self.window_size) // stride_length) + 1
 
     def feedforward(self, prev_layer, w, b):
         """
