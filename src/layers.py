@@ -247,9 +247,10 @@ class MaxPoolingLayer(Layer):
                     src_window = src[m:m+self.window_size, n:n+self.window_size]
                     dst_window = dst[m:m+self.window_size, n:n+self.window_size]
                     assert src_window.shape == dst_window.shape == (self.window_size, self.window_size)
-                    # derivative of max()
+                    # derivative of max(): all zeros except where src_window was the max value
                     der = np.zeros_like(src_window, dtype=np.uint8)
                     der[np.unravel_index(src_window.argmax(), src_window.shape)] = 1
+                    assert np.sum(der) == 1
                     dst_window[:] *= der
 
         return der_w, der_b, delta_zl
