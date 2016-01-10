@@ -58,7 +58,8 @@ class NeuralNetwork():
             self.feedforward(x)
 
             # propagate the error backward
-            delta = self.loss_func(self.output_layer.a, y) * self.output_layer.der_act_func(self.output_layer.z, y)
+            loss = self.loss_func(self.output_layer.a, y)
+            delta = loss * self.output_layer.der_act_func(self.output_layer.z, y)
             for prev_layer, layer in reversed(self.layers):
                 w = self.weights[layer]
                 der_w, der_b, delta = layer.backpropagate(prev_layer, w, delta)
