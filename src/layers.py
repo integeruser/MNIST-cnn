@@ -4,6 +4,7 @@ import scipy.signal
 import numpy as np
 
 import functions as f
+import utils as u
 
 
 class Layer(metaclass=abc.ABCMeta):
@@ -11,17 +12,20 @@ class Layer(metaclass=abc.ABCMeta):
         self.depth  = None
         self.height = None
         self.width  = None
+        self.n_out  = None
+        self.w      = None
+        self.b      = None
 
     @abc.abstractmethod
     def connect_to(self, prev_layer):
         raise AssertionError
 
     @abc.abstractmethod
-    def feedforward(self, prev_layer, w, b):
+    def feedforward(self, prev_layer):
         raise AssertionError
 
     @abc.abstractmethod
-    def backpropagate(self, prev_layer, w, delta_z):
+    def backpropagate(self, prev_layer, delta_z):
         raise AssertionError
 
 
@@ -31,14 +35,15 @@ class InputLayer(Layer):
         self.depth  = 1
         self.height = height
         self.width  = width
+        self.n_out  = self.depth*self.height*self.width
 
     def connect_to(self, prev_layer):
         raise AssertionError
 
-    def feedforward(self, prev_layer, w, b):
+    def feedforward(self, prev_layer):
         raise AssertionError
 
-    def backpropagate(self, prev_layer, w, delta_z):
+    def backpropagate(self, prev_layer, delta_z):
         raise AssertionError
 
 
@@ -48,32 +53,33 @@ class FullyConnectedLayer(Layer):
         self.depth  = 1
         self.height = height
         self.width  = 1
+        self.n_out  = self.depth*self.height*self.width
         self.act_func = act_func
         self.der_act_func = getattr(f, "der_%s" % act_func.__name__)
 
     def connect_to(self, prev_layer):
-        pass
+        w_shape = (self.n_out, prev_layer.n_out)
+        self.w = u.glorot_uniform(w_shape, prev_layer.n_out, self.n_out).astype(np.float32)
+        b_shape = (self.n_out, 1)
+        self.b = np.zeros(b_shape).astype(np.float32)
 
-    def feedforward(self, prev_layer, w, b):
+    def feedforward(self, prev_layer):
         """
         Feedforward the observation through the layer
 
         :param prev_layer: the previous layer of the network
-        :param w: the weights connecting the previous layer with this one
-        :param b: the biases of this layer
         """
         input_a = prev_layer.a.reshape((prev_layer.a.size, 1))
-        self.z = (w @ input_a) + b
+        self.z = (self.w @ input_a) + self.b
 
         self.a = self.act_func(self.z)
         assert self.z.shape == self.a.shape
 
-    def backpropagate(self, prev_layer, w, delta_z):
+    def backpropagate(self, prev_layer, delta_z):
         """
         Backpropagate the error through the layer
 
         :param prev_layer: the previous layer of the network
-        :param w: the weights connecting the previous layer with this one
         :param delta_z: the error propagated backward by the next layer of the network
         :returns: the amount of change of input weights of this layer, the amount of change of the biases of this layer
             and the error propagated by this layer
@@ -85,7 +91,7 @@ class FullyConnectedLayer(Layer):
 
         der_b = np.copy(delta_z)
 
-        delta_zl = (w.T @ delta_z).reshape(prev_layer.z.shape) * self.der_act_func(prev_layer.z)
+        delta_zl = (self.w.T @ delta_z).reshape(prev_layer.z.shape) * self.der_act_func(prev_layer.z)
 
         return der_w, der_b, delta_zl
 
@@ -94,7 +100,6 @@ class ConvolutionalLayer(Layer):
     def __init__(self, depth, kernel_size, act_func):
         super().__init__()
         self.depth = depth
-
         self.kernel_size = kernel_size
         self.act_func = act_func
         self.der_act_func = getattr(f, "der_%s" % act_func.__name__)
@@ -103,44 +108,45 @@ class ConvolutionalLayer(Layer):
         stride_length = 1
         self.height = ((prev_layer.height-self.kernel_size) // stride_length) + 1
         self.width  = ((prev_layer.width -self.kernel_size) // stride_length) + 1
+        self.n_out  = self.depth*self.height*self.width
 
-    def feedforward(self, prev_layer, w, b):
+        w_shape = (self.depth, prev_layer.depth, self.kernel_size, self.kernel_size)
+        self.w = u.glorot_uniform(w_shape, prev_layer.n_out, self.n_out).astype(np.float32)
+        b_shape = (self.depth, 1)
+        self.b = np.zeros(b_shape).astype(np.float32)
+
+    def feedforward(self, prev_layer):
         """
         Feedforward the observation through the layer
 
         :param prev_layer: the previous layer of the network. The activations of the previous layer must be a list of
             feature maps, where each feature map is a 2d matrix
-        :param w: the weights connecting the previous layer with this one (must be a list of 3d tensors with shape
-            (depth, prev_layer.depth, kernel_size, kernel_size))
-        :param b: the biases of this layer (must be a list of scalars with shape (depth, 1))
         """
+        assert self.w.shape == (self.depth, prev_layer.depth, self.kernel_size, self.kernel_size)
+        assert self.b.shape == (self.depth, 1)
         assert prev_layer.a.ndim == 3
-        assert w.shape == (self.depth, prev_layer.depth, self.kernel_size, self.kernel_size)
-        assert b.shape == (self.depth, 1)
 
-        self.z = np.array([scipy.signal.convolve(prev_layer.a, fmap, mode="valid") for fmap in w])
+        self.z = np.array([scipy.signal.convolve(prev_layer.a, fmap, mode="valid") for fmap in self.w])
         assert self.z.shape[1] == 1
         self.z = np.squeeze(self.z, axis=1)
         assert self.z.ndim == 3
         for r in range(self.depth):
-            self.z[r] += b[r]
+            self.z[r] += self.b[r]
 
         self.a = np.vectorize(self.act_func)(self.z)
         assert self.a.shape == self.z.shape
 
-    def backpropagate(self, prev_layer, w, delta_z):
+    def backpropagate(self, prev_layer, delta_z):
         """
         Backpropagate the error through the layer
 
         :param prev_layer: the previous layer of the network. The activations of the previous layer are a list of
             feature maps, where each feature map is a 2d matrix
-        :param w: the weights connecting the previous layer with this one (a list of tensors with shape
-            (depth, prev_layer.depth, kernel_size, kernel_size))
         :param delta_z:
         """
         assert delta_z.shape[0] == self.depth
 
-        der_w = np.empty_like(w)
+        der_w = np.empty_like(self.w)
         for t in range(prev_layer.depth):
             for r in range(self.depth):
                 src = prev_layer.a[t]
@@ -159,9 +165,9 @@ class ConvolutionalLayer(Layer):
         delta_zl = np.zeros_like(prev_layer.a)
         for t in range(prev_layer.depth):
             for r in range(self.depth):
-                src =    delta_z[r]
-                kernel = w[r, t]
-                dst =    delta_zl[t]
+                src    =    delta_z[r]
+                kernel =     self.w[r, t]
+                dst    =   delta_zl[t]
                 for i, m in enumerate(range(0, prev_layer.height, self.kernel_size)):
                     for j, n in enumerate(range(0, prev_layer.width, self.kernel_size)):
                         dst_window = dst[m:m+self.kernel_size, n:n+self.kernel_size]
@@ -174,7 +180,6 @@ class ConvolutionalLayer(Layer):
 class MaxPoolingLayer(Layer):
     def __init__(self, pool_size):
         super().__init__()
-
         self.pool_size = pool_size
 
     def connect_to(self, prev_layer):
@@ -183,21 +188,25 @@ class MaxPoolingLayer(Layer):
         stride_length = self.pool_size
         self.height = ((prev_layer.height-self.pool_size) // stride_length) + 1
         self.width  = ((prev_layer.width -self.pool_size) // stride_length) + 1
+        self.n_out  = self.depth*self.height*self.width
 
-    def feedforward(self, prev_layer, w, b):
+        w_shape = (0)
+        self.w = u.glorot_uniform(w_shape, prev_layer.n_out, self.n_out).astype(np.float32)
+        b_shape = (0)
+        self.b = np.zeros(b_shape).astype(np.float32)
+
+    def feedforward(self, prev_layer):
         """
         Feedforward the observation through the layer
 
         :param prev_layer: the previous layer of the network. The activations of the previous layer must be a list of
             feature maps, where each feature map is a 3d matrix
-        :param w: should be an empty array (no weights between a convolutional layer and a pooling layer)
-        :param b: should be an empty array (no biases in a pooling layer)
         """
+        assert self.w.size == 0
+        assert self.b.size == 0
         assert isinstance(prev_layer, ConvolutionalLayer)
         assert prev_layer.depth == self.depth
         assert prev_layer.a.ndim == 3
-        assert w.size == 0
-        assert b.size == 0
 
         prev_layer_fmap_size = prev_layer.height
         assert prev_layer_fmap_size % self.pool_size == 0
@@ -215,21 +224,19 @@ class MaxPoolingLayer(Layer):
 
         self.a = self.z
 
-    def backpropagate(self, prev_layer, w, delta_z):
+    def backpropagate(self, prev_layer, delta_z):
         """
         Backpropagate the error through the layer. Given any pair source(convolutional)/destination(pooling) feature
         maps, each unit of the destination feature map propagates an error to a window (self.pool_size, self.pool_size)
         of the source feature map
 
         :param prev_layer: the previous layer of the network
-        :param w: the weights connecting the previous layer with this one. Since the previous layer is for sure
-            a convolutional layer, this tensor should be empty
         :param delta_z: a tensor of shape (self.depth, self.height, self.width)
         """
+        assert self.w.size == 0
         assert isinstance(prev_layer, ConvolutionalLayer)
         assert prev_layer.depth == self.depth
         assert prev_layer.a.ndim == 3
-        assert w.size == 0
         assert delta_z.shape == (self.depth, self.height, self.width)
 
         der_w = np.array([])

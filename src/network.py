@@ -19,40 +19,19 @@ class NeuralNetwork():
 
         self.loss_func = loss_func
 
-        self.weights = dict()
-        self.biases = dict()
         for prev_layer, layer in self.layers:
             layer.connect_to(prev_layer)
-
-            prev_layer_nout = prev_layer.depth * prev_layer.height * prev_layer.width
-            layer_nin       = prev_layer_nout
-            layer_nout      = layer.depth      * layer.height      * layer.width
-            if type(layer) is l.FullyConnectedLayer:
-                w_shape = (layer_nout, prev_layer_nout)
-                b_shape = (layer_nout, 1)
-            elif type(layer) is l.ConvolutionalLayer:
-                w_shape = (layer.depth, prev_layer.depth, layer.kernel_size, layer.kernel_size)
-                b_shape = (layer.depth, 1)
-            elif type(layer) is l.MaxPoolingLayer:
-                w_shape = (0)
-                b_shape = (0)
-            else:
-                raise NotImplementedError
-            self.weights[layer] = u.glorot_uniform(w_shape, layer_nin, layer_nout).astype(np.float32)
-            self.biases[layer]  = np.zeros(b_shape).astype(np.float32)
 
     def feedforward(self, x):
         self.input_layer.z = x
         self.input_layer.a = x
 
         for prev_layer, layer in self.layers:
-            w = self.weights[layer]
-            b = self.biases[layer]
-            layer.feedforward(prev_layer, w, b)
+            layer.feedforward(prev_layer)
 
     def backpropagate(self, batch, optimizer):
-        der_weights = {layer: np.zeros_like(self.weights[layer]) for _, layer in self.layers}
-        der_biases  = {layer: np.zeros_like(self.biases[layer])  for _, layer in self.layers}
+        der_weights = {layer: np.zeros_like(layer.w) for _, layer in self.layers}
+        der_biases  = {layer: np.zeros_like(layer.b)  for _, layer in self.layers}
 
         for x, y in batch:
             self.feedforward(x)
@@ -61,8 +40,7 @@ class NeuralNetwork():
             loss = self.loss_func(self.output_layer.a, y)
             delta = loss * self.output_layer.der_act_func(self.output_layer.z, y)
             for prev_layer, layer in reversed(self.layers):
-                w = self.weights[layer]
-                der_w, der_b, delta = layer.backpropagate(prev_layer, w, delta)
+                der_w, der_b, delta = layer.backpropagate(prev_layer, delta)
                 der_weights[layer] += der_w
                 der_biases[layer]  += der_b
 
@@ -79,17 +57,17 @@ class NeuralNetwork():
             gb = der_biases[layer] /len(batch)
 
             if optimizer["type"] == "SGD":
-                self.weights[layer] += -optimizer["eta"]*gw
-                self.biases[layer]  += -optimizer["eta"]*gb
+                layer.w += -optimizer["eta"]*gw
+                layer.b += -optimizer["eta"]*gb
             elif optimizer["type"] == "adadelta":
                 gsum_weights[layer] = rho*gsum_weights[layer] + (1-rho)*gw*gw
                 dx = -np.sqrt((xsum_weights[layer]+eps)/(gsum_weights[layer]+eps)) * gw
-                self.weights[layer] += dx
+                layer.w += dx
                 xsum_weights[layer] = rho*xsum_weights[layer] + (1-rho)*dx*dx
 
                 gsum_biases[layer]  = rho*gsum_biases[layer]  + (1-rho)*gb*gb
                 dx = -np.sqrt((xsum_biases[layer] +eps)/(gsum_biases[layer] +eps)) * gb
-                self.biases[layer]  += dx
+                layer.b += dx
                 xsum_biases[layer]  = rho*xsum_biases[layer]  + (1-rho)*dx*dx
             else:
                 raise NotImplementedError
