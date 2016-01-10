@@ -42,6 +42,16 @@ def fcl03():  # 91.75%
     batch_size = 10
     return net, optimizer, num_epochs, batch_size
 
+def fcl04():  # 91.38%
+    net = n.NeuralNetwork([
+        l.InputLayer(height=28, width=28),
+        l.FullyConnectedLayer(10, act_func=f.softmax)
+    ], f.categorical_crossentropy)
+    optimizer = {"type": "SGD", "eta": 0.1}
+    num_epochs = 1
+    batch_size = 10
+    return net, optimizer, num_epochs, batch_size
+
 
 def cnn01():  # 88.13%
     net = n.NeuralNetwork([
