@@ -45,32 +45,7 @@ class NeuralNetwork():
                 der_biases[layer]  += der_b
 
         # update weights and biases
-        if optimizer["type"] == "adadelta":
-            rho = 0.95
-            eps = 1e-8
-            gsum_weights = {layer: 0 for _, layer in self.layers}
-            xsum_weights = {layer: 0 for _, layer in self.layers}
-            gsum_biases  = {layer: 0 for _, layer in self.layers}
-            xsum_biases  = {layer: 0 for _, layer in self.layers}
-        for _, layer in self.layers:
-            gw = der_weights[layer]/len(batch)
-            gb = der_biases[layer] /len(batch)
-
-            if optimizer["type"] == "SGD":
-                layer.w += -optimizer["eta"]*gw
-                layer.b += -optimizer["eta"]*gb
-            elif optimizer["type"] == "adadelta":
-                gsum_weights[layer] = rho*gsum_weights[layer] + (1-rho)*gw*gw
-                dx = -np.sqrt((xsum_weights[layer]+eps)/(gsum_weights[layer]+eps)) * gw
-                layer.w += dx
-                xsum_weights[layer] = rho*xsum_weights[layer] + (1-rho)*dx*dx
-
-                gsum_biases[layer]  = rho*gsum_biases[layer]  + (1-rho)*gb*gb
-                dx = -np.sqrt((xsum_biases[layer] +eps)/(gsum_biases[layer] +eps)) * gb
-                layer.b += dx
-                xsum_biases[layer]  = rho*xsum_biases[layer]  + (1-rho)*dx*dx
-            else:
-                raise NotImplementedError
+        optimizer.apply(self.layers, der_weights, der_biases, len(batch))
 
 
 def train(net, optimizer, num_epochs, batch_size, trn_set, vld_set=None):
