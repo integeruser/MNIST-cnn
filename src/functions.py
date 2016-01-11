@@ -1,7 +1,7 @@
 import numpy as np
 
 
-### weights initialization functions ###########################################
+### weights initializations ####################################################
 
 def glorot_uniform(shape, num_neurons_in, num_neurons_out):
     scale = np.sqrt(6. / (num_neurons_in + num_neurons_out))
@@ -12,7 +12,7 @@ def zero(shape):
     return np.zeros(shape).astype(np.float32)
 
 
-### activations functions ######################################################
+### activations ################################################################
 
 def sigmoid(x):
     return 1.0 / (1.0 + np.exp(-x))
@@ -36,7 +36,7 @@ def der_softmax(x, y=None):
     return s * (1 - s)
 
 
-### loss functions #############################################################
+### objectives #################################################################
 
 def quadratic(a, y):
     return a-y
