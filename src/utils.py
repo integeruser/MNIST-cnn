@@ -41,7 +41,7 @@ def load_mnist_npz(mnist_npzpath):
 
     trn_imgs = dataset["trn_imgs"]
     trn_lbls = dataset["trn_lbls"]
-    trn_x = np.array([img/255. for img in trn_imgs]).astype(np.float32)
+    trn_x = np.array([img/255. for img in trn_imgs])
     trn_y = np.array([to_categorical(lbl) for lbl in trn_lbls]).astype(np.uint8)
 
     tst_imgs = dataset["tst_imgs"]

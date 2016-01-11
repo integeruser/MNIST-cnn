@@ -139,7 +139,7 @@ class ConvolutionalLayer(Layer):
         new_h = ((image_h-filters_h) // stride) + 1
         new_w = ((image_w-filters_w) // stride) + 1
 
-        self.z = np.zeros((filters_c_out, new_h, new_w)).astype(np.float32)
+        self.z = np.zeros((filters_c_out, new_h, new_w))
         for fc in range(filters_c_out):
             src = prev_layer.a
             dst = self.z[fc]

@@ -9,7 +9,7 @@ def glorot_uniform(shape, num_neurons_in, num_neurons_out):
 
 
 def zero(shape):
-    return np.zeros(shape).astype(np.float32)
+    return np.zeros(shape)
 
 
 ### activations ################################################################
