@@ -42,20 +42,21 @@ mnist.npz: Zip archive data, at least v2.0 to extract
 
 Run any of the included examples:
 ```
-src ➤ python3 examples.py mnist.npz fcl01
+src ➤ python3 -OO examples.py mnist.npz fcl02
 Loading 'mnist.npz'...
-Loading 'fcl01'...
-def fcl01():  # 91.75%
+Loading 'fcl02'...
+def fcl02():  # 95.72%
     net = n.NeuralNetwork([
         l.InputLayer(height=28, width=28),
-        l.FullyConnectedLayer(height=10, act_func=f.softmax)
-    ], f.log_likelihood)
-    optimizer = {"type": "SGD", "eta": 0.1}
+        l.FullyConnectedLayer(100, init_func=f.glorot_uniform, act_func=f.sigmoid),
+        l.FullyConnectedLayer(10, init_func=f.glorot_uniform, act_func=f.sigmoid)
+    ], f.quadratic)
+    optimizer = o.SGD(3.0)
     num_epochs = 1
     batch_size = 10
     return net, optimizer, num_epochs, batch_size
 Training NN...
-Epoch 01 [==========] [6000/6000 batches] > Accuracy: 91.75%
+Epoch 01 [==========] [60000/60000] > Accuracy: 95.72%
 ```
 
 
