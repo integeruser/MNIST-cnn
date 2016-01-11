@@ -1,6 +1,5 @@
 import abc
 
-import scipy.signal
 import numpy as np
 
 import functions as f
@@ -126,10 +125,34 @@ class ConvolutionalLayer(Layer):
         assert self.b.shape == (self.depth, 1)
         assert prev_layer.a.ndim == 3
 
-        self.z = np.array([scipy.signal.convolve(prev_layer.a, fmap, mode="valid") for fmap in self.w])
-        assert self.z.shape[1] == 1
-        self.z = np.squeeze(self.z, axis=1)
-        assert self.z.ndim == 3
+        filters_c_out = self.w.shape[0]
+        filters_c_in  = self.w.shape[1]
+        filters_h     = self.w.shape[2]
+        filters_w     = self.w.shape[3]
+
+        image_c = prev_layer.a.shape[0]
+        assert image_c == filters_c_in
+        image_h = prev_layer.a.shape[1]
+        image_w = prev_layer.a.shape[2]
+
+        stride = 1
+        new_h = ((image_h-filters_h) // stride) + 1
+        new_w = ((image_w-filters_w) // stride) + 1
+
+        self.z = np.zeros((filters_c_out, new_h, new_w)).astype(np.float32)
+        for fc in range(filters_c_out):
+            src = prev_layer.a
+            dst = self.z[fc]
+            for ic in range(image_c):
+                flt = self.w[fc, ic]
+                for i, m in enumerate(range(image_h)):
+                    for j, n in enumerate(range(image_w)):
+                        src_window = src[ic, m:m+filters_h, n:n+filters_w]
+                        if src_window.shape != flt.shape:
+                            # out of borders
+                            break
+                        dst[i, j] += np.convolve(src_window.ravel(), flt.ravel(), mode="valid")
+
         for r in range(self.depth):
             self.z[r] += self.b[r]
 
