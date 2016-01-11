@@ -1,6 +1,17 @@
 import numpy as np
 
 
+### weights initialization functions ###########################################
+
+def glorot_uniform(shape, num_neurons_in, num_neurons_out):
+    scale = np.sqrt(6. / (num_neurons_in + num_neurons_out))
+    return np.random.uniform(low=-scale, high=scale, size=shape)
+
+
+def zero(shape):
+    return np.zeros(shape).astype(np.float32)
+
+
 ### activations functions ######################################################
 
 def sigmoid(x):

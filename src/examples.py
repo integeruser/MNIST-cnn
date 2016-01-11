@@ -14,7 +14,7 @@ import utils as u
 def fcl01():  # 90.21%
     net = n.NeuralNetwork([
         l.InputLayer(height=28, width=28),
-        l.FullyConnectedLayer(10, act_func=f.sigmoid)
+        l.FullyConnectedLayer(10, init_func=f.glorot_uniform, act_func=f.sigmoid)
     ], f.quadratic)
     optimizer = {"type": "SGD", "eta": 0.1}
     num_epochs = 1
@@ -24,8 +24,8 @@ def fcl01():  # 90.21%
 def fcl02():  # 95.72%
     net = n.NeuralNetwork([
         l.InputLayer(height=28, width=28),
-        l.FullyConnectedLayer(100, act_func=f.sigmoid),
-        l.FullyConnectedLayer(10, act_func=f.sigmoid)
+        l.FullyConnectedLayer(100, init_func=f.glorot_uniform, act_func=f.sigmoid),
+        l.FullyConnectedLayer(10, init_func=f.glorot_uniform, act_func=f.sigmoid)
     ], f.quadratic)
     optimizer = {"type": "SGD", "eta": 3.0}
     num_epochs = 1
@@ -35,7 +35,7 @@ def fcl02():  # 95.72%
 def fcl03():  # 91.75%
     net = n.NeuralNetwork([
         l.InputLayer(height=28, width=28),
-        l.FullyConnectedLayer(10, act_func=f.softmax)
+        l.FullyConnectedLayer(10, init_func=f.glorot_uniform, act_func=f.softmax)
     ], f.log_likelihood)
     optimizer = {"type": "SGD", "eta": 0.1}
     num_epochs = 1
@@ -45,7 +45,7 @@ def fcl03():  # 91.75%
 def fcl04():  # 91.38%
     net = n.NeuralNetwork([
         l.InputLayer(height=28, width=28),
-        l.FullyConnectedLayer(10, act_func=f.softmax)
+        l.FullyConnectedLayer(10, init_func=f.glorot_uniform, act_func=f.softmax)
     ], f.categorical_crossentropy)
     optimizer = {"type": "SGD", "eta": 0.1}
     num_epochs = 1
@@ -56,9 +56,9 @@ def fcl04():  # 91.38%
 def cnn01():  # 88.13%
     net = n.NeuralNetwork([
         l.InputLayer(height=28, width=28),
-        l.ConvolutionalLayer(2, kernel_size=5, act_func=f.sigmoid),
+        l.ConvolutionalLayer(2, kernel_size=5, init_func=f.glorot_uniform, act_func=f.sigmoid),
         l.MaxPoolingLayer(pool_size=2),
-        l.FullyConnectedLayer(height=10, act_func=f.softmax)
+        l.FullyConnectedLayer(height=10, init_func=f.glorot_uniform, act_func=f.softmax)
     ], f.log_likelihood)
     optimizer = {"type": "SGD", "eta": 0.1}
     num_epochs = 1
@@ -68,9 +68,9 @@ def cnn01():  # 88.13%
 def cnn02():  # 84.60%
     net = n.NeuralNetwork([
         l.InputLayer(height=28, width=28),
-        l.ConvolutionalLayer(2, kernel_size=5, act_func=f.sigmoid),
+        l.ConvolutionalLayer(2, kernel_size=5, init_func=f.glorot_uniform, act_func=f.sigmoid),
         l.MaxPoolingLayer(pool_size=2),
-        l.FullyConnectedLayer(height=10, act_func=f.softmax)
+        l.FullyConnectedLayer(height=10, init_func=f.glorot_uniform, act_func=f.softmax)
     ], f.categorical_crossentropy)
     optimizer = {"type": "SGD", "eta": 0.1}
     num_epochs = 1

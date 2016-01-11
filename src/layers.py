@@ -48,20 +48,20 @@ class InputLayer(Layer):
 
 
 class FullyConnectedLayer(Layer):
-    def __init__(self, height, act_func):
+    def __init__(self, height, init_func, act_func):
         super().__init__()
         self.depth  = 1
         self.height = height
         self.width  = 1
         self.n_out  = self.depth*self.height*self.width
+        self.init_func = init_func
         self.act_func = act_func
         self.der_act_func = getattr(f, "der_%s" % act_func.__name__)
 
     def connect_to(self, prev_layer):
-        w_shape = (self.n_out, prev_layer.n_out)
-        self.w = u.glorot_uniform(w_shape, prev_layer.n_out, self.n_out).astype(np.float32)
-        b_shape = (self.n_out, 1)
-        self.b = np.zeros(b_shape).astype(np.float32)
+        self.w = self.init_func((self.n_out, prev_layer.n_out),
+            prev_layer.n_out, self.n_out)
+        self.b = f.zero((self.n_out, 1))
 
     def feedforward(self, prev_layer):
         """
@@ -97,10 +97,11 @@ class FullyConnectedLayer(Layer):
 
 
 class ConvolutionalLayer(Layer):
-    def __init__(self, depth, kernel_size, act_func):
+    def __init__(self, depth, kernel_size, init_func, act_func):
         super().__init__()
         self.depth = depth
         self.kernel_size = kernel_size
+        self.init_func = init_func
         self.act_func = act_func
         self.der_act_func = getattr(f, "der_%s" % act_func.__name__)
 
@@ -110,10 +111,9 @@ class ConvolutionalLayer(Layer):
         self.width  = ((prev_layer.width -self.kernel_size) // stride_length) + 1
         self.n_out  = self.depth*self.height*self.width
 
-        w_shape = (self.depth, prev_layer.depth, self.kernel_size, self.kernel_size)
-        self.w = u.glorot_uniform(w_shape, prev_layer.n_out, self.n_out).astype(np.float32)
-        b_shape = (self.depth, 1)
-        self.b = np.zeros(b_shape).astype(np.float32)
+        self.w = self.init_func((self.depth, prev_layer.depth, self.kernel_size, self.kernel_size),
+            prev_layer.n_out, self.n_out)
+        self.b = f.zero((self.depth, 1))
 
     def feedforward(self, prev_layer):
         """
@@ -190,10 +190,8 @@ class MaxPoolingLayer(Layer):
         self.width  = ((prev_layer.width -self.pool_size) // stride_length) + 1
         self.n_out  = self.depth*self.height*self.width
 
-        w_shape = (0)
-        self.w = u.glorot_uniform(w_shape, prev_layer.n_out, self.n_out).astype(np.float32)
-        b_shape = (0)
-        self.b = np.zeros(b_shape).astype(np.float32)
+        self.w = np.empty((0))
+        self.b = np.empty((0))
 
     def feedforward(self, prev_layer):
         """

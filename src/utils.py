@@ -51,11 +51,6 @@ def load_mnist_npz(mnist_npzpath):
     return (trn_x, trn_y), (tst_x, tst_y)
 
 
-def glorot_uniform(size, num_neurons_in, num_neurons_out):
-    scale = np.sqrt(6. / (num_neurons_in + num_neurons_out))
-    return np.random.uniform(low=-scale, high=scale, size=size)
-
-
 class bcolors:
     HEADER    = "\033[95m"
     OKBLUE    = "\033[94m"
