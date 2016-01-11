@@ -78,6 +78,18 @@ def cnn02():  # 84.60%
     batch_size = 10
     return net, optimizer, num_epochs, batch_size
 
+def cnn03():  # 80.08%
+    net = n.NeuralNetwork([
+        l.InputLayer(height=28, width=28),
+        l.ConvolutionalLayer(2, kernel_size=5, init_func=f.glorot_uniform, act_func=f.sigmoid),
+        l.MaxPoolingLayer(pool_size=3),
+        l.FullyConnectedLayer(height=10, init_func=f.glorot_uniform, act_func=f.softmax)
+    ], f.categorical_crossentropy)
+    optimizer = o.SGD(0.1)
+    num_epochs = 1
+    batch_size = 10
+    return net, optimizer, num_epochs, batch_size
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
