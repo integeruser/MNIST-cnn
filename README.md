@@ -5,9 +5,9 @@ Alessandro and Francesco
 
 
 ## Prerequisites
-The code uses the [NumPy](http://www.numpy.org/) and [SciPy](https://www.scipy.org/) libraries. Install the required dependencies with:
+The code uses only the [NumPy](http://www.numpy.org/) library. Install the required dependencies with:
 ```
-pip3 install numpy scipy
+pip3 install numpy
 ```
 
 Then, download the MNIST data set (four `.gz` archives, see link above) and decompress it:
