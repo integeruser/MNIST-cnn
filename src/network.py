@@ -30,8 +30,8 @@ class NeuralNetwork():
             layer.feedforward(prev_layer)
 
     def backpropagate(self, batch, optimizer):
-        der_weights = {layer: np.zeros_like(layer.w) for _, layer in self.layers}
-        der_biases  = {layer: np.zeros_like(layer.b)  for _, layer in self.layers}
+        sum_der_w = {layer: np.zeros_like(layer.w) for _, layer in self.layers}
+        sum_der_b = {layer: np.zeros_like(layer.b) for _, layer in self.layers}
 
         for x, y in batch:
             self.feedforward(x)
@@ -41,11 +41,11 @@ class NeuralNetwork():
             delta = loss * self.output_layer.der_act_func(self.output_layer.z, y)
             for prev_layer, layer in reversed(self.layers):
                 der_w, der_b, delta = layer.backpropagate(prev_layer, delta)
-                der_weights[layer] += der_w
-                der_biases[layer]  += der_b
+                sum_der_w[layer] += der_w
+                sum_der_b[layer] += der_b
 
         # update weights and biases
-        optimizer.apply(self.layers, der_weights, der_biases, len(batch))
+        optimizer.apply(self.layers, sum_der_w, sum_der_b, len(batch))
 
 
 def train(net, optimizer, num_epochs, batch_size, trn_set, vld_set=None):
