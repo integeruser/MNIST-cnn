@@ -264,8 +264,7 @@ class MaxPoolingLayer(Layer):
 
         der_b = np.array([])
 
-        delta_zl = np.kron(delta_z, np.zeros((self.pool_size, self.pool_size)))
-        assert delta_zl.shape == (prev_layer.depth, prev_layer.height, prev_layer.width)
+        delta_zl = np.zeros_like(prev_layer.a)
         for t, r in zip(range(prev_layer.depth), range(self.depth)):
             src = prev_layer.a[t]
             err =      delta_z[t]
