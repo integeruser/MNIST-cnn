@@ -40,9 +40,10 @@ class NeuralNetwork():
             loss = self.loss_func(self.output_layer.a, y)
             delta = loss * self.output_layer.der_act_func(self.output_layer.z, y)
             for prev_layer, layer in reversed(self.layers):
-                der_w, der_b, delta = layer.backpropagate(prev_layer, delta)
+                der_w, der_b, prev_delta = layer.backpropagate(prev_layer, delta)
                 sum_der_w[layer] += der_w
                 sum_der_b[layer] += der_b
+                delta = prev_delta
 
         # update weights and biases
         optimizer.apply(self.layers, sum_der_w, sum_der_b, len(batch))
