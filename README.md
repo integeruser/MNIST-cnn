@@ -63,7 +63,7 @@ Epoch 01 [==========] [60000/60000] > Accuracy: 95.72%
 ## License
 The MIT License (MIT)
 
-Copyright (c) 2015-2016 Alessandro Torcinovich, Francesco Cagnin
+Copyright (c) 2015-2016 Francesco Cagnin, Alessandro Torcinovich
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
