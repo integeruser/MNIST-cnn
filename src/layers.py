@@ -68,8 +68,8 @@ class FullyConnectedLayer(Layer):
 
         :param prev_layer: the previous layer of the network
         """
-        input_a = prev_layer.a.reshape((prev_layer.a.size, 1))
-        self.z = (self.w @ input_a) + self.b
+        prev_a = prev_layer.a.reshape((prev_layer.a.size, 1))
+        self.z = (self.w @ prev_a) + self.b
 
         self.a = self.act_func(self.z)
         assert self.z.shape == self.a.shape
@@ -85,8 +85,8 @@ class FullyConnectedLayer(Layer):
         """
         assert delta.shape == self.z.shape == self.a.shape
 
-        input_a = prev_layer.a.reshape((prev_layer.a.size, 1))
-        der_w = delta @ input_a.T
+        prev_a = prev_layer.a.reshape((prev_layer.a.size, 1))
+        der_w = delta @ prev_a.T
 
         der_b = np.copy(delta)
 
