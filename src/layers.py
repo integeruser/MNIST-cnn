@@ -8,12 +8,12 @@ import utils as u
 
 class Layer(metaclass=abc.ABCMeta):
     def __init__(self):
-        self.depth  = None
+        self.depth = None
         self.height = None
-        self.width  = None
-        self.n_out  = None
-        self.w      = None
-        self.b      = None
+        self.width = None
+        self.n_out = None
+        self.w = None
+        self.b = None
 
     @abc.abstractmethod
     def connect_to(self, prev_layer):
@@ -31,10 +31,10 @@ class Layer(metaclass=abc.ABCMeta):
 class InputLayer(Layer):
     def __init__(self, height, width):
         super().__init__()
-        self.depth  = 1
+        self.depth = 1
         self.height = height
-        self.width  = width
-        self.n_out  = self.depth*self.height*self.width
+        self.width = width
+        self.n_out = self.depth * self.height * self.width
 
     def connect_to(self, prev_layer):
         raise AssertionError
@@ -49,17 +49,16 @@ class InputLayer(Layer):
 class FullyConnectedLayer(Layer):
     def __init__(self, height, init_func, act_func):
         super().__init__()
-        self.depth  = 1
+        self.depth = 1
         self.height = height
-        self.width  = 1
-        self.n_out  = self.depth*self.height*self.width
+        self.width = 1
+        self.n_out = self.depth * self.height * self.width
         self.init_func = init_func
         self.act_func = act_func
         self.der_act_func = getattr(f, "der_%s" % act_func.__name__)
 
     def connect_to(self, prev_layer):
-        self.w = self.init_func((self.n_out, prev_layer.n_out),
-            prev_layer.n_out, self.n_out)
+        self.w = self.init_func((self.n_out, prev_layer.n_out), prev_layer.n_out, self.n_out)
         self.b = f.zero((self.n_out, 1))
 
     def feedforward(self, prev_layer):
@@ -69,6 +68,7 @@ class FullyConnectedLayer(Layer):
         :param prev_layer: the previous layer of the network
         """
         prev_a = prev_layer.a.reshape((prev_layer.a.size, 1))
+
         self.z = (self.w @ prev_a) + self.b
 
         self.a = self.act_func(self.z)
@@ -86,6 +86,7 @@ class FullyConnectedLayer(Layer):
         assert delta.shape == self.z.shape == self.a.shape
 
         prev_a = prev_layer.a.reshape((prev_layer.a.size, 1))
+
         der_w = delta @ prev_a.T
 
         der_b = np.copy(delta)
@@ -105,10 +106,10 @@ class ConvolutionalLayer(Layer):
         self.der_act_func = getattr(f, "der_%s" % act_func.__name__)
 
     def connect_to(self, prev_layer):
-        stride_length = 1
-        self.height = ((prev_layer.height-self.kernel_size) // stride_length) + 1
-        self.width  = ((prev_layer.width -self.kernel_size) // stride_length) + 1
-        self.n_out  = self.depth*self.height*self.width
+        self.stride_length = 1
+        self.height = ((prev_layer.height - self.kernel_size) // self.stride_length) + 1
+        self.width  = ((prev_layer.width  - self.kernel_size) // self.stride_length) + 1
+        self.n_out = self.depth * self.height * self.width
 
         self.w = self.init_func((self.depth, prev_layer.depth, self.kernel_size, self.kernel_size),
             prev_layer.n_out, self.n_out)
@@ -125,10 +126,12 @@ class ConvolutionalLayer(Layer):
         assert self.b.shape == (self.depth, 1)
         assert prev_layer.a.ndim == 3
 
+        prev_a = prev_layer.a
+
         filters_c_out = self.w.shape[0]
-        filters_c_in  = self.w.shape[1]
-        filters_h     = self.w.shape[2]
-        filters_w     = self.w.shape[3]
+        filters_c_in = self.w.shape[1]
+        filters_h = self.w.shape[2]
+        filters_w = self.w.shape[3]
 
         image_c = prev_layer.a.shape[0]
         assert image_c == filters_c_in
@@ -136,22 +139,17 @@ class ConvolutionalLayer(Layer):
         image_w = prev_layer.a.shape[2]
 
         stride = 1
-        new_h = ((image_h-filters_h) // stride) + 1
-        new_w = ((image_w-filters_w) // stride) + 1
+        new_h = ((image_h - filters_h) // stride) + 1
+        new_w = ((image_w - filters_w) // stride) + 1
 
         self.z = np.zeros((filters_c_out, new_h, new_w))
-        for fc in range(filters_c_out):
-            src = prev_layer.a
-            dst = self.z[fc]
-            for ic in range(image_c):
-                flt = self.w[fc, ic]
-                for i, m in enumerate(range(image_h)):
-                    for j, n in enumerate(range(image_w)):
-                        src_window = src[ic, m:m+filters_h, n:n+filters_w]
-                        if src_window.shape != flt.shape:
-                            # out of borders
-                            break
-                        dst[i, j] += np.convolve(src_window.ravel(), flt.ravel(), mode="valid")
+        for r in range(filters_c_out):
+            for t in range(image_c):
+                filter = self.w[r, t]
+                for i, m in enumerate(range(0, image_h - filters_h + 1, self.stride_length)):
+                    for j, n in enumerate(range(0, image_w - filters_w + 1, self.stride_length)):
+                        prev_a_window = prev_a[t, m:m+filters_h, n:n+filters_w]
+                        self.z[r, i, j] += np.convolve(prev_a_window.ravel(), filter.ravel(), mode="valid")
 
         for r in range(self.depth):
             self.z[r] += self.b[r]
@@ -169,33 +167,28 @@ class ConvolutionalLayer(Layer):
         """
         assert delta.shape[0] == self.depth
 
+        prev_a = prev_layer.a
+
         der_w = np.empty_like(self.w)
-        for t in range(prev_layer.depth):
-            for r in range(self.depth):
-                src = prev_layer.a[t]
-                err =      delta[r]
-                dst =  der_w[r, t]
+        for r in range(self.depth):
+            for t in range(prev_layer.depth):
                 for h in range(self.kernel_size):
                     for v in range(self.kernel_size):
-                        src_window = src[v:self.height, h:self.width]
-                        err_window = err[v:self.height, h:self.width]
-                        dst[h, v] = np.sum(src_window * err_window)
+                        prev_a_window = prev_a[t, v:self.height, h:self.width]
+                        delta_window  =  delta[r, v:self.height, h:self.width]
+                        der_w[r, t, h, v] = np.sum(prev_a_window * delta_window)
 
         der_b = np.empty((self.depth, 1))
         for r in range(self.depth):
             der_b[r] = np.sum(delta[r])
 
-        prev_delta = np.zeros_like(prev_layer.a)
-        for t in range(prev_layer.depth):
-            for r in range(self.depth):
-                src    =    delta[r]
-                kernel =     self.w[r, t]
-                dst    =   prev_delta[t]
-                for i, m in enumerate(range(0, prev_layer.height, self.kernel_size)):
-                    for j, n in enumerate(range(0, prev_layer.width, self.kernel_size)):
-                        dst_window = dst[m:m+self.kernel_size, n:n+self.kernel_size]
-                        rows, cols = dst_window.shape
-                        dst_window += kernel[:rows, :cols] * src[i, j]
+        prev_delta = np.zeros_like(prev_a)
+        for r in range(self.depth):
+            for t in range(prev_layer.depth):
+                kernel = self.w[r, t]
+                for i, m in enumerate(range(0, prev_layer.height - self.kernel_size + 1, self.stride_length)):
+                    for j, n in enumerate(range(0, prev_layer.width - self.kernel_size + 1, self.stride_length)):
+                        prev_delta[t, m:m+self.kernel_size, n:n+self.kernel_size] += kernel * delta[r, i, j]
 
         return der_w, der_b, prev_delta
 
@@ -207,11 +200,10 @@ class MaxPoolingLayer(Layer):
 
     def connect_to(self, prev_layer):
         assert isinstance(prev_layer, ConvolutionalLayer)
-        self.depth  = prev_layer.depth
-        stride_length = self.pool_size
-        self.height = ((prev_layer.height-self.pool_size) // stride_length) + 1
-        self.width  = ((prev_layer.width -self.pool_size) // stride_length) + 1
-        self.n_out  = self.depth*self.height*self.width
+        self.depth = prev_layer.depth
+        self.height = ((prev_layer.height - self.pool_size) // self.pool_size) + 1
+        self.width  = ((prev_layer.width  - self.pool_size) // self.pool_size) + 1
+        self.n_out = self.depth * self.height * self.width
 
         self.w = np.empty((0))
         self.b = np.empty((0))
@@ -229,19 +221,20 @@ class MaxPoolingLayer(Layer):
         assert prev_layer.depth == self.depth
         assert prev_layer.a.ndim == 3
 
+        prev_a = prev_layer.a
+
         prev_layer_fmap_size = prev_layer.height
         assert prev_layer_fmap_size % self.pool_size == 0
 
         self.z = np.zeros((self.depth, self.height, self.width))
-        for t, r in zip(range(prev_layer.depth), range(self.depth)):
-            src = prev_layer.a[t]
-            dst =       self.z[r]
+        for r, t in zip(range(self.depth), range(prev_layer.depth)):
+            assert r == t
             for i, m in enumerate(range(0, prev_layer.height, self.pool_size)):
                 for j, n in enumerate(range(0, prev_layer.width, self.pool_size)):
-                    src_window = src[m:m+self.pool_size, n:n+self.pool_size]
-                    assert src_window.shape == (self.pool_size, self.pool_size)
+                    prev_a_window = prev_a[t, m:m+self.pool_size, n:n+self.pool_size]
+                    assert prev_a_window.shape == (self.pool_size, self.pool_size)
                     # downsampling
-                    dst[i, j] = np.max(src_window)
+                    self.z[r, i, j] = np.max(prev_a_window)
 
         self.a = self.z
 
@@ -255,28 +248,30 @@ class MaxPoolingLayer(Layer):
         :param delta: a tensor of shape (self.depth, self.height, self.width)
         """
         assert self.w.size == 0
+        assert self.b.size == 0
         assert isinstance(prev_layer, ConvolutionalLayer)
         assert prev_layer.depth == self.depth
         assert prev_layer.a.ndim == 3
         assert delta.shape == (self.depth, self.height, self.width)
 
+        prev_a = prev_layer.a
+
         der_w = np.array([])
 
         der_b = np.array([])
 
-        prev_delta = np.zeros_like(prev_layer.a)
-        for t, r in zip(range(prev_layer.depth), range(self.depth)):
-            src = prev_layer.a[t]
-            err =      delta[t]
-            dst =     prev_delta[r]
+        prev_delta = np.empty_like(prev_a)
+        for r, t in zip(range(self.depth), range(prev_layer.depth)):
+            assert r == t
             for i, m in enumerate(range(0, prev_layer.height, self.pool_size)):
                 for j, n in enumerate(range(0, prev_layer.width, self.pool_size)):
-                    src_window = src[m:m+self.pool_size, n:n+self.pool_size]
-                    dst_window = dst[m:m+self.pool_size, n:n+self.pool_size]
-                    assert src_window.shape == dst_window.shape == (self.pool_size, self.pool_size)
+                    prev_a_window = prev_a[t, m:m+self.pool_size, n:n+self.pool_size]
+                    assert prev_a_window.shape == (self.pool_size, self.pool_size)
                     # upsampling: the unit which was the max at the forward propagation
-                    # receives all the error at backward propagation
-                    assert not np.any(dst_window)
-                    dst_window[np.unravel_index(src_window.argmax(), src_window.shape)] = err[i, j]
+                    # receives all the error at backward propagation (the other units receive zero)
+                    max_unit_index = np.unravel_index(prev_a_window.argmax(), prev_a_window.shape)
+                    prev_delta_window = np.zeros_like(prev_a_window)
+                    prev_delta_window[max_unit_index] = delta[t, i, j]
+                    prev_delta[r, m:m+self.pool_size, n:n+self.pool_size] = prev_delta_window
 
         return der_w, der_b, prev_delta
