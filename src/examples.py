@@ -54,7 +54,7 @@ def fcl04():  # 91.38%
     return net, optimizer, num_epochs, batch_size
 
 
-def cnn01():  # 88.13%
+def cnn01():  # 88.05%
     net = n.NeuralNetwork([
         l.InputLayer(height=28, width=28),
         l.ConvolutionalLayer(2, kernel_size=5, init_func=f.glorot_uniform, act_func=f.sigmoid),
@@ -66,7 +66,7 @@ def cnn01():  # 88.13%
     batch_size = 10
     return net, optimizer, num_epochs, batch_size
 
-def cnn02():  # 84.60%
+def cnn02():  # 84.19%
     net = n.NeuralNetwork([
         l.InputLayer(height=28, width=28),
         l.ConvolutionalLayer(2, kernel_size=5, init_func=f.glorot_uniform, act_func=f.sigmoid),
@@ -78,7 +78,7 @@ def cnn02():  # 84.60%
     batch_size = 10
     return net, optimizer, num_epochs, batch_size
 
-def cnn03():  # 80.08%
+def cnn03():  # 79.41%
     net = n.NeuralNetwork([
         l.InputLayer(height=28, width=28),
         l.ConvolutionalLayer(2, kernel_size=5, init_func=f.glorot_uniform, act_func=f.sigmoid),

@@ -174,8 +174,11 @@ class ConvolutionalLayer(Layer):
             for t in range(prev_layer.depth):
                 for h in range(self.kernel_size):
                     for v in range(self.kernel_size):
-                        prev_a_window = prev_a[t, v:self.height, h:self.width]
-                        delta_window  =  delta[r, v:self.height, h:self.width]
+                        prev_a_window = prev_a[t, v:v+self.height-self.kernel_size+1:self.stride_length,
+                                                  h:h+self.width -self.kernel_size+1:self.stride_length]
+                        delta_window  =  delta[r, v:v+self.height-self.kernel_size+1:self.stride_length,
+                                                  h:h+self.width -self.kernel_size+1:self.stride_length]
+                        assert prev_a_window.shape == delta_window.shape
                         der_w[r, t, h, v] = np.sum(prev_a_window * delta_window)
 
         der_b = np.empty((self.depth, 1))
