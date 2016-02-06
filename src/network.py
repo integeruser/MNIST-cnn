@@ -72,7 +72,7 @@ def train(net, optimizer, num_epochs, batch_size, trn_set, vld_set=None):
             # test the net at the end of each epoch
             u.print("Epoch %02d %s [%d/%d] > Testing..." % (i+1, u.bar(inputs_done, len(inputs)), inputs_done, len(inputs)), override=True)
             accuracy = test(net, vld_set)
-            u.print("Epoch %02d %s [%d/%d] > Accuracy: %0.2f%%" % (i+1, u.bar(inputs_done, len(inputs)), inputs_done, len(inputs), accuracy*100), override=True)
+            u.print("Epoch %02d %s [%d/%d] > Validation accuracy: %0.2f%%" % (i+1, u.bar(inputs_done, len(inputs)), inputs_done, len(inputs), accuracy*100), override=True)
         u.print()
 
 def test(net, tst_set):
