@@ -106,9 +106,9 @@ if __name__ == "__main__":
     net, optimizer, num_epochs, batch_size = locals()[args.func]()
     u.print(inspect.getsource(locals()[args.func]).strip())
 
-    u.print("Training NN...", bcolor=u.bcolors.BOLD)
+    u.print("Training network...", bcolor=u.bcolors.BOLD)
     n.train(net, optimizer, num_epochs, batch_size, trn_set)
 
-    u.print("Testing NN...", bcolor=u.bcolors.BOLD)
+    u.print("Testing network...", bcolor=u.bcolors.BOLD)
     accuracy = n.test(net, tst_set)
     u.print("Test accuracy: %0.2f%%" % (accuracy*100))
