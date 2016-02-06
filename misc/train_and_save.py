@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import argparse
-import sys
 
 import numpy as np
 np.random.seed(1337)
@@ -48,8 +47,13 @@ def cnn(trn_set, tst_set):
 
 ################################################################################
 
-trn_set, tst_set = u.load_mnist_npz("mnist.npz")
-model, trn_x, trn_y, tst_x, tst_y = locals()[sys.argv[1]](trn_set, tst_set)
+parser = argparse.ArgumentParser()
+parser.add_argument("data", help="the path to the MNIST data set in .npz format (generated using utils.py)")
+parser.add_argument("func", help="the function name of the test to be run")
+args = parser.parse_args()
+
+trn_set, tst_set = u.load_mnist_npz(args.data)
+model, trn_x, trn_y, tst_x, tst_y = locals()[args.func](trn_set, tst_set)
 model.fit(trn_x, trn_y, nb_epoch=1, batch_size=10, show_accuracy=True)
 score = model.evaluate(tst_x, tst_y, show_accuracy=True)
 print("Test score:", score[0])
