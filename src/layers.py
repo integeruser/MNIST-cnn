@@ -133,10 +133,10 @@ class ConvolutionalLayer(Layer):
         filters_h = self.w.shape[2]
         filters_w = self.w.shape[3]
 
-        image_c = prev_layer.a.shape[0]
+        image_c = prev_a.shape[0]
         assert image_c == filters_c_in
-        image_h = prev_layer.a.shape[1]
-        image_w = prev_layer.a.shape[2]
+        image_h = prev_a.shape[1]
+        image_w = prev_a.shape[2]
 
         stride = 1
         new_h = ((image_h - filters_h) // stride) + 1
