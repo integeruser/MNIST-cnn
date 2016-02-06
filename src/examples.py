@@ -12,17 +12,7 @@ import network as n
 import utils as u
 
 
-def fcl01():  # 90.21%
-    net = n.NeuralNetwork([
-        l.InputLayer(height=28, width=28),
-        l.FullyConnectedLayer(10, init_func=f.glorot_uniform, act_func=f.sigmoid)
-    ], f.quadratic)
-    optimizer = o.SGD(0.1)
-    num_epochs = 1
-    batch_size = 10
-    return net, optimizer, num_epochs, batch_size
-
-def fcl02():  # 95.72%
+def fcl01():  # 95.07%
     net = n.NeuralNetwork([
         l.InputLayer(height=28, width=28),
         l.FullyConnectedLayer(100, init_func=f.glorot_uniform, act_func=f.sigmoid),
@@ -33,17 +23,7 @@ def fcl02():  # 95.72%
     batch_size = 10
     return net, optimizer, num_epochs, batch_size
 
-def fcl03():  # 91.75%
-    net = n.NeuralNetwork([
-        l.InputLayer(height=28, width=28),
-        l.FullyConnectedLayer(10, init_func=f.glorot_uniform, act_func=f.softmax)
-    ], f.log_likelihood)
-    optimizer = o.SGD(0.1)
-    num_epochs = 1
-    batch_size = 10
-    return net, optimizer, num_epochs, batch_size
-
-def fcl04():  # 91.38%
+def fcl02():  # 91.15%
     net = n.NeuralNetwork([
         l.InputLayer(height=28, width=28),
         l.FullyConnectedLayer(10, init_func=f.glorot_uniform, act_func=f.softmax)
@@ -54,7 +34,7 @@ def fcl04():  # 91.38%
     return net, optimizer, num_epochs, batch_size
 
 
-def cnn01():  # 88.05%
+def cnn01():  # 89.90%
     net = n.NeuralNetwork([
         l.InputLayer(height=28, width=28),
         l.ConvolutionalLayer(2, kernel_size=5, init_func=f.glorot_uniform, act_func=f.sigmoid),
@@ -62,23 +42,11 @@ def cnn01():  # 88.05%
         l.FullyConnectedLayer(height=10, init_func=f.glorot_uniform, act_func=f.softmax)
     ], f.log_likelihood)
     optimizer = o.SGD(0.1)
-    num_epochs = 1
+    num_epochs = 3
     batch_size = 10
     return net, optimizer, num_epochs, batch_size
 
-def cnn02():  # 84.19%
-    net = n.NeuralNetwork([
-        l.InputLayer(height=28, width=28),
-        l.ConvolutionalLayer(2, kernel_size=5, init_func=f.glorot_uniform, act_func=f.sigmoid),
-        l.MaxPoolingLayer(pool_size=2),
-        l.FullyConnectedLayer(height=10, init_func=f.glorot_uniform, act_func=f.softmax)
-    ], f.categorical_crossentropy)
-    optimizer = o.SGD(0.1)
-    num_epochs = 1
-    batch_size = 10
-    return net, optimizer, num_epochs, batch_size
-
-def cnn03():  # 79.41%
+def cnn02():  # 84.61%
     net = n.NeuralNetwork([
         l.InputLayer(height=28, width=28),
         l.ConvolutionalLayer(2, kernel_size=5, init_func=f.glorot_uniform, act_func=f.sigmoid),
@@ -86,8 +54,8 @@ def cnn03():  # 79.41%
         l.FullyConnectedLayer(height=10, init_func=f.glorot_uniform, act_func=f.softmax)
     ], f.categorical_crossentropy)
     optimizer = o.SGD(0.1)
-    num_epochs = 1
-    batch_size = 10
+    num_epochs = 2
+    batch_size = 8
     return net, optimizer, num_epochs, batch_size
 
 
@@ -101,13 +69,14 @@ if __name__ == "__main__":
 
     u.print("Loading '%s'..." % args.data, bcolor=u.bcolors.BOLD)
     trn_set, tst_set = u.load_mnist_npz(args.data)
+    trn_set, vld_set = (trn_set[0][:50000], trn_set[1][:50000]), (trn_set[0][50000:], trn_set[1][50000:])
 
     u.print("Loading '%s'..." % args.func, bcolor=u.bcolors.BOLD)
     net, optimizer, num_epochs, batch_size = locals()[args.func]()
     u.print(inspect.getsource(locals()[args.func]).strip())
 
     u.print("Training network...", bcolor=u.bcolors.BOLD)
-    n.train(net, optimizer, num_epochs, batch_size, trn_set)
+    n.train(net, optimizer, num_epochs, batch_size, trn_set, vld_set)
 
     u.print("Testing network...", bcolor=u.bcolors.BOLD)
     accuracy = n.test(net, tst_set)

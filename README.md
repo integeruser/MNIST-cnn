@@ -42,10 +42,10 @@ mnist.npz: Zip archive data, at least v2.0 to extract
 
 Run any of the included examples:
 ```
-src ➤ python3 -OO examples.py mnist.npz fcl02
-Loading 'mnist.npz'...
-Loading 'fcl02'...
-def fcl02():  # 95.72%
+src ➤ python3 -OO examples.py mnist.npz fcl01
+Loading '../mnist.npz'...
+Loading 'fcl01'...
+def fcl01():  # 95.72%
     net = n.NeuralNetwork([
         l.InputLayer(height=28, width=28),
         l.FullyConnectedLayer(100, init_func=f.glorot_uniform, act_func=f.sigmoid),
@@ -55,8 +55,32 @@ def fcl02():  # 95.72%
     num_epochs = 1
     batch_size = 10
     return net, optimizer, num_epochs, batch_size
-Training NN...
-Epoch 01 [==========] [60000/60000] > Accuracy: 95.72%
+Training network...
+Epoch 01 [==========] [50000/50000] > Validation accuracy: 95.41%
+Testing network...
+Test accuracy: 95.07%
+```
+```
+src ➤ python3 -OO examples.py mnist.npz cnn01
+Loading '../mnist.npz'...
+Loading 'cnn01'...
+def cnn01():  # 88.05%
+    net = n.NeuralNetwork([
+        l.InputLayer(height=28, width=28),
+        l.ConvolutionalLayer(2, kernel_size=5, init_func=f.glorot_uniform, act_func=f.sigmoid),
+        l.MaxPoolingLayer(pool_size=2),
+        l.FullyConnectedLayer(height=10, init_func=f.glorot_uniform, act_func=f.softmax)
+    ], f.log_likelihood)
+    optimizer = o.SGD(0.1)
+    num_epochs = 3
+    batch_size = 10
+    return net, optimizer, num_epochs, batch_size
+Training network...
+Epoch 01 [==========] [50000/50000] > Validation accuracy: 88.12%
+Epoch 02 [==========] [50000/50000] > Validation accuracy: 89.40%
+Epoch 03 [==========] [50000/50000] > Validation accuracy: 89.80%
+Testing network...
+Test accuracy: 89.90%
 ```
 
 
