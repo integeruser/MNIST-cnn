@@ -149,7 +149,7 @@ class ConvolutionalLayer(Layer):
                 for i, m in enumerate(range(0, image_h - filters_h + 1, self.stride_length)):
                     for j, n in enumerate(range(0, image_w - filters_w + 1, self.stride_length)):
                         prev_a_window = prev_a[t, m:m+filters_h, n:n+filters_w]
-                        self.z[r, i, j] += np.convolve(prev_a_window.ravel(), filter.ravel(), mode="valid")
+                        self.z[r, i, j] += np.correlate(prev_a_window.ravel(), filter.ravel(), mode="valid")
 
         for r in range(self.depth):
             self.z[r] += self.b[r]

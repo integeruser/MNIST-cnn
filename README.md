@@ -61,10 +61,10 @@ Testing network...
 Test accuracy: 95.07%
 ```
 ```
-src ➤ python3 -OO examples.py mnist.npz cnn01
+src ➤ time python3 -OO examples.py mnist.npz cnn01
 Loading '../mnist.npz'...
 Loading 'cnn01'...
-def cnn01():  # 88.05%
+def cnn01():  # 90.19%
     net = n.NeuralNetwork([
         l.InputLayer(height=28, width=28),
         l.ConvolutionalLayer(2, kernel_size=5, init_func=f.glorot_uniform, act_func=f.sigmoid),
@@ -76,11 +76,12 @@ def cnn01():  # 88.05%
     batch_size = 10
     return net, optimizer, num_epochs, batch_size
 Training network...
-Epoch 01 [==========] [50000/50000] > Validation accuracy: 88.12%
-Epoch 02 [==========] [50000/50000] > Validation accuracy: 89.40%
-Epoch 03 [==========] [50000/50000] > Validation accuracy: 89.80%
+Epoch 01 [==========] [50000/50000] > Validation accuracy: 85.02%
+Epoch 02 [==========] [50000/50000] > Validation accuracy: 89.00%
+Epoch 03 [==========] [50000/50000] > Validation accuracy: 90.13%
 Testing network...
-Test accuracy: 89.90%
+Test accuracy: 90.19%
+python3 -OO examples.py mnist.npz cnn01  2618.95s user 5.36s system 99% cpu 43:46.39 total
 ```
 
 
