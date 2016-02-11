@@ -42,10 +42,10 @@ mnist.npz: Zip archive data, at least v2.0 to extract
 
 Run any of the included examples:
 ```
-src ➤ python3 -OO examples.py mnist.npz fcl01
-Loading '../mnist.npz'...
+src ➤ time python3 -OO examples.py mnist.npz fcl01
+Loading 'mnist.npz'...
 Loading 'fcl01'...
-def fcl01():  # 95.72%
+def fcl01():
     net = n.NeuralNetwork([
         l.InputLayer(height=28, width=28),
         l.FullyConnectedLayer(100, init_func=f.glorot_uniform, act_func=f.sigmoid),
@@ -59,12 +59,13 @@ Training network...
 Epoch 01 [==========] [50000/50000] > Validation accuracy: 95.41%
 Testing network...
 Test accuracy: 95.07%
+python3 -OO examples.py mnist.npz fcl01  24.10s user 4.07s system 130% cpu 21.517 total
 ```
 ```
 src ➤ time python3 -OO examples.py mnist.npz cnn01
-Loading '../mnist.npz'...
+Loading 'mnist.npz'...
 Loading 'cnn01'...
-def cnn01():  # 90.19%
+def cnn01():
     net = n.NeuralNetwork([
         l.InputLayer(height=28, width=28),
         l.ConvolutionalLayer(2, kernel_size=5, init_func=f.glorot_uniform, act_func=f.sigmoid),
@@ -81,7 +82,7 @@ Epoch 02 [==========] [50000/50000] > Validation accuracy: 89.00%
 Epoch 03 [==========] [50000/50000] > Validation accuracy: 90.13%
 Testing network...
 Test accuracy: 90.19%
-python3 -OO examples.py mnist.npz cnn01  2618.95s user 5.36s system 99% cpu 43:46.39 total
+python3 -OO examples.py mnist.npz cnn01  2538.92s user 3.43s system 99% cpu 42:29.82 total
 ```
 
 
