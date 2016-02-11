@@ -12,7 +12,7 @@ import network as n
 import utils as u
 
 
-def fcl01():  # 95.07%
+def fcl01():
     net = n.NeuralNetwork([
         l.InputLayer(height=28, width=28),
         l.FullyConnectedLayer(100, init_func=f.glorot_uniform, act_func=f.sigmoid),
@@ -23,7 +23,7 @@ def fcl01():  # 95.07%
     batch_size = 10
     return net, optimizer, num_epochs, batch_size
 
-def fcl02():  # 91.15%
+def fcl02():
     net = n.NeuralNetwork([
         l.InputLayer(height=28, width=28),
         l.FullyConnectedLayer(10, init_func=f.glorot_uniform, act_func=f.softmax)
@@ -34,7 +34,7 @@ def fcl02():  # 91.15%
     return net, optimizer, num_epochs, batch_size
 
 
-def cnn01():  # 90.19%
+def cnn01():
     net = n.NeuralNetwork([
         l.InputLayer(height=28, width=28),
         l.ConvolutionalLayer(2, kernel_size=5, init_func=f.glorot_uniform, act_func=f.sigmoid),
@@ -46,7 +46,7 @@ def cnn01():  # 90.19%
     batch_size = 10
     return net, optimizer, num_epochs, batch_size
 
-def cnn02():  # 84.58%
+def cnn02():
     net = n.NeuralNetwork([
         l.InputLayer(height=28, width=28),
         l.ConvolutionalLayer(2, kernel_size=5, init_func=f.glorot_uniform, act_func=f.sigmoid),
