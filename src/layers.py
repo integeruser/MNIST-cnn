@@ -192,6 +192,7 @@ class ConvolutionalLayer(Layer):
                 for i, m in enumerate(range(0, prev_layer.height - self.kernel_size + 1, self.stride_length)):
                     for j, n in enumerate(range(0, prev_layer.width - self.kernel_size + 1, self.stride_length)):
                         prev_delta[t, m:m+self.kernel_size, n:n+self.kernel_size] += kernel * delta[r, i, j]
+        prev_delta *= self.der_act_func(prev_layer.z)
 
         return der_w, der_b, prev_delta
 
