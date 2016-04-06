@@ -35,6 +35,7 @@ class InputLayer(Layer):
         self.height = height
         self.width = width
         self.n_out = self.depth * self.height * self.width
+        self.der_act_func = lambda x: x
 
     def connect_to(self, prev_layer):
         raise AssertionError
@@ -91,7 +92,7 @@ class FullyConnectedLayer(Layer):
 
         der_b = np.copy(delta)
 
-        prev_delta = (self.w.T @ delta).reshape(prev_layer.z.shape) * self.der_act_func(prev_layer.z)
+        prev_delta = (self.w.T @ delta).reshape(prev_layer.z.shape) * prev_layer.der_act_func(prev_layer.z)
 
         return der_w, der_b, prev_delta
 
@@ -192,7 +193,7 @@ class ConvolutionalLayer(Layer):
                 for i, m in enumerate(range(0, prev_layer.height - self.kernel_size + 1, self.stride_length)):
                     for j, n in enumerate(range(0, prev_layer.width - self.kernel_size + 1, self.stride_length)):
                         prev_delta[t, m:m+self.kernel_size, n:n+self.kernel_size] += kernel * delta[r, i, j]
-        prev_delta *= self.der_act_func(prev_layer.z)
+        prev_delta *= prev_layer.der_act_func(prev_layer.z)
 
         return der_w, der_b, prev_delta
 
@@ -201,6 +202,7 @@ class MaxPoolingLayer(Layer):
     def __init__(self, pool_size):
         super().__init__()
         self.pool_size = pool_size
+        self.der_act_func = lambda x: x
 
     def connect_to(self, prev_layer):
         assert isinstance(prev_layer, ConvolutionalLayer)

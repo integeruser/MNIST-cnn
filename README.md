@@ -62,7 +62,7 @@ Test accuracy: 95.07%
 python3 -OO examples.py mnist.npz fcl01  24.10s user 4.07s system 130% cpu 21.517 total
 ```
 ```
-src ➤ time python3 -OO examples.py mnist.npz cnn01
+src ➤ time python3 examples.py mnist.npz cnn01                                          git:master*
 Loading 'mnist.npz'...
 Loading 'cnn01'...
 def cnn01():
@@ -77,12 +77,12 @@ def cnn01():
     batch_size = 10
     return net, optimizer, num_epochs, batch_size
 Training network...
-Epoch 01 [==========] [50000/50000] > Validation accuracy: 85.02%
-Epoch 02 [==========] [50000/50000] > Validation accuracy: 89.00%
-Epoch 03 [==========] [50000/50000] > Validation accuracy: 90.13%
+Epoch 01 [==========] [50000/50000] > Validation accuracy: 88.86%
+Epoch 02 [==========] [50000/50000] > Validation accuracy: 89.84%
+Epoch 03 [==========] [50000/50000] > Validation accuracy: 89.11%
 Testing network...
-Test accuracy: 90.19%
-python3 -OO examples.py mnist.npz cnn01  2538.92s user 3.43s system 99% cpu 42:29.82 total
+Test accuracy: 88.53%
+python3 examples.py mnist.npz cnn01  2869.89s user 11.16s system 99% cpu 45:12.89 total
 ```
 
 
