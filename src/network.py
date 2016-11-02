@@ -1,6 +1,5 @@
 import numpy as np
 
-import functions as f
 import layers as l
 import utils as u
 
