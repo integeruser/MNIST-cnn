@@ -1,5 +1,5 @@
 # MNIST-cnn
-This repository contains a naïve Python 3 implementation of a neural network with convolutional and pooling layers, useful for educational purposes. The network was tested with satisfactory results the on the well-known [MNIST](http://yann.lecun.com/exdb/mnist/) data set.
+This repository contains a Python 3 naïve implementation of a neural network with convolutional and pooling layers, useful for educational purposes. It was tested with satisfactory results the on the well-known [MNIST](http://yann.lecun.com/exdb/mnist/) data set.
 
 Alessandro and Francesco
 
@@ -19,11 +19,11 @@ Downloads ➤ gzip -d *
 Downloads ➤ ls
 t10k-images-idx3-ubyte  t10k-labels-idx1-ubyte  train-images-idx3-ubyte train-labels-idx1-ubyte
 ```
-**Note**: on Windows, as per our tests, the extracted files will have a different name of the ones showed above (e.g. `train-images.idx3-ubyte` instead of `train-images-idx3-ubyte`). You can either manually rename the extracted files or modify lines 9-12 of `utils.py` to compensate these differences.
+**Note**: on Windows, as per our tests, the extracted files will have a different name of the ones showed above (e.g. `train-images.idx3-ubyte` instead of `train-images-idx3-ubyte`). You can either manually rename the extracted files or modify lines 10-13 of `src/utils.py`.
 
 
 ## Usage
-Convert the downloaded data set to the NPZ binary data format using the function `build_mnist_npz()` from `utils.py`:
+Convert the downloaded data set to the NPZ binary data format using the function `build_mnist_npz()` from `src/utils.py`:
 ```
 MNIST-cnn ➤ cd src
 src ➤ ls
